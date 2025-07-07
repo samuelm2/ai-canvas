@@ -212,6 +212,24 @@ export default function ImageCanvas() {
     }
   }, [selectedImageId]);
 
+  // Handle image duplication
+  const handleImageDuplicate = useCallback((id: string) => {
+    const imageToDuplicate = images.find(img => img.id === id);
+    if (!imageToDuplicate) return;
+    
+    // Create a new image with the same properties but new ID and offset position
+    const newImage: CanvasImage = {
+      ...imageToDuplicate,
+      id: generateId(),
+      x: imageToDuplicate.x + 30, // Offset to the right
+      y: imageToDuplicate.y + 30, // Offset down
+      selected: false, // Don't select the duplicate
+      isGenerating: false, // Not generating since we're copying existing image
+    };
+    
+    setImages(prev => [...prev, newImage]);
+  }, [images]);
+
   // Organize images in a grid
   const organizeInGrid = useCallback(() => {
     const standardSize = 256;
@@ -375,6 +393,7 @@ export default function ImageCanvas() {
             onDrag={handleImageDrag}
             onDelete={handleImageDelete}
             onSelect={handleImageSelect}
+            onDuplicate={handleImageDuplicate}
             isOrganizing={isOrganizing}
           />
         ))}
