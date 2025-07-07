@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import DraggableImage from './DraggableImage';
 import PromptInput from './PromptInput';
-import { CanvasImage, GridConfig, ImageLoadingState } from '../types';
+import { CanvasImage, GridConfig } from '../types';
 import { AIService } from '../services/aiService';
 
 // Grid layout constants
@@ -26,6 +26,16 @@ export default function ImageCanvas() {
   
   // Track active requests for cancellation
   const activeRequestsRef = useRef<Map<string, AbortController>>(new Map());
+  
+  // Helper function to preload an image
+  const preloadImage = (url: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = url;
+    });
+  };
   
   // Demo mode is now handled automatically on the server side
 
@@ -142,11 +152,32 @@ export default function ImageCanvas() {
       activeRequestsRef.current.delete(tileId);
       
       if (result.success && result.imageUrl) {
+        // Set state to urlLoading but don't update src yet
         setImages(prev => prev.map(img => 
           img.id === tileId 
-            ? { ...img, src: result.imageUrl!, loadingState: 'urlLoading' }
+            ? { ...img, loadingState: 'urlLoading' }
             : img
         ));
+        
+        // Preload the image
+        try {
+          await preloadImage(result.imageUrl);
+          
+          // Only update src after image is fully loaded
+          setImages(prev => prev.map(img => 
+            img.id === tileId 
+              ? { ...img, src: result.imageUrl!, loadingState: 'finished' }
+              : img
+          ));
+        } catch (error) {
+          console.error('Failed to preload image:', error);
+          setError('Failed to load image');
+          setImages(prev => prev.map(img => 
+            img.id === tileId 
+              ? { ...img, loadingState: 'finished' }
+              : img
+          ));
+        }
       } else if (result.error !== 'Request cancelled') {
         // Only show error if it wasn't cancelled
         setError(result.error || 'Failed to generate image');
@@ -238,12 +269,7 @@ export default function ImageCanvas() {
     setImages(prev => [...prev, newImage]);
   }, [images]);
 
-  // Handle image load completion
-  const handleImageLoad = useCallback((id: string) => {
-    setImages(prev => prev.map(img => 
-      img.id === id ? { ...img, loadingState: 'finished' } : img
-    ));
-  }, []);
+
 
   // Handle image expansion into 4 variations
   const handleImageExpand = useCallback(async (id: string) => {
@@ -505,7 +531,6 @@ export default function ImageCanvas() {
               onSelect={handleImageSelect}
               onDuplicate={handleImageDuplicate}
               onExpand={handleImageExpand}
-              onImageLoad={handleImageLoad}
               isOrganizing={isOrganizing}
             />
           ))}

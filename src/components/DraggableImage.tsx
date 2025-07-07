@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Draggable from 'react-draggable';
-import { CanvasImage, ImageLoadingState } from '../types';
+import { CanvasImage } from '../types';
 
 interface DraggableImageProps {
   image: CanvasImage;
@@ -11,11 +11,10 @@ interface DraggableImageProps {
   onSelect: (id: string) => void;
   onDuplicate: (id: string) => void;
   onExpand: (id: string) => void;
-  onImageLoad: (id: string) => void;
   isOrganizing: boolean;
 }
 
-export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, onImageLoad, isOrganizing }: DraggableImageProps) {
+export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, isOrganizing }: DraggableImageProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const nodeRef = useRef(null);
@@ -59,9 +58,7 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
     onSelect(image.id);
   };
 
-  const handleImageLoad = () => {
-    onImageLoad(image.id);
-  };
+
 
   return (
     <Draggable
@@ -101,9 +98,25 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
           <img
             src={image.src}
             alt={image.prompt || 'Generated image'}
-            className={`w-full h-full object-cover rounded-lg transition-transform duration-200 ${
+            className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
               isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
             } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()} // Prevent image drag
+            style={{ 
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+            }}
+          />
+        ) : image.src && image.loadingState !== 'finished' ? (
+          <img
+            src={image.src}
+            alt={image.prompt || 'Generated image'}
+            className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
+              isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
+            } ${image.selected ? 'ring-4 ring-blue-500' : ''} opacity-60`}
             draggable={false}
             onDragStart={(e) => e.preventDefault()} // Prevent image drag
             style={{ 
@@ -128,15 +141,7 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
           </div>
         )}
         
-        {/* Image with loading detection */}
-        {image.src && image.loadingState === 'urlLoading' && (
-          <img
-            src={image.src}
-            onLoad={handleImageLoad}
-            style={{ display: 'none' }}
-            alt=""
-          />
-        )}
+
         
         {/* Small corner loading indicator */}
         {(image.loadingState === 'waitingOnAPI' || image.loadingState === 'urlLoading') && (
