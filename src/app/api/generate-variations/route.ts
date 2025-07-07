@@ -44,15 +44,16 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: 'You are a creative AI assistant that generates image prompt variations. Given an original image prompt, create 4 different variations that explore different artistic styles, moods, or creative interpretations while maintaining the core subject matter. Each variation should be distinct and creative.'
+            content: 'You are a creative AI assistant that generates image prompt variations. Given an original image prompt, create 4 different variations that explore different artistic styles, moods, or creative interpretations while maintaining the core subject matter. Each variation should be distinct and creative. Return your response as a JSON object with a "variations" array containing exactly 4 strings.'
           },
           {
             role: 'user',
-            content: `Create 4 creative variations of this image prompt: "${prompt}"\n\nReturn only the 4 variations, one per line, without numbering or additional text.`
+            content: `Create 4 creative variations of this image prompt: "${prompt}"\n\nReturn a JSON object with this structure: {"variations": ["variation1", "variation2", "variation3", "variation4"]}`
           }
         ],
         max_tokens: 300,
         temperature: 0.8,
+        response_format: { type: "json_object" }
       },
       {
         headers: {
@@ -67,10 +68,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No response from OpenAI API' }, { status: 500 });
     }
 
-    // Parse variations from response
-    const variations = content.split('\n').filter((line: string) => line.trim()).slice(0, 4);
+    // Parse JSON response
+    let apiResponse;
+    try {
+      apiResponse = JSON.parse(content);
+    } catch (parseError) {
+      console.error('Error parsing OpenAI JSON response:', parseError);
+      return NextResponse.json({ error: 'Invalid JSON response from OpenAI' }, { status: 500 });
+    }
+
+    let variations = apiResponse.variations || [];
     
-    if (variations.length < 4) {
+    // Ensure we have exactly 4 variations
+    if (!Array.isArray(variations) || variations.length < 4) {
       // Pad with demo variations if needed
       const demoVariations = [
         `${prompt}, artistic oil painting style`,
@@ -81,6 +91,9 @@ export async function POST(request: NextRequest) {
       const additionalVariations = demoVariations.slice(0, 4 - variations.length);
       variations.push(...additionalVariations);
     }
+
+    // Ensure we only return 4 variations
+    variations = variations.slice(0, 4);
 
     return NextResponse.json({
       success: true,
