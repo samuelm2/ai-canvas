@@ -144,7 +144,7 @@ export default function ImageCanvas() {
       if (result.success && result.imageUrl) {
         setImages(prev => prev.map(img => 
           img.id === tileId 
-            ? { ...img, src: result.imageUrl!, isGenerating: false }
+            ? { ...img, src: result.imageUrl! } // Keep isGenerating true until image loads
             : img
         ));
       } else if (result.error !== 'Request cancelled') {
@@ -237,6 +237,13 @@ export default function ImageCanvas() {
     
     setImages(prev => [...prev, newImage]);
   }, [images]);
+
+  // Handle image load completion
+  const handleImageLoad = useCallback((id: string) => {
+    setImages(prev => prev.map(img => 
+      img.id === id ? { ...img, isGenerating: false } : img
+    ));
+  }, []);
 
   // Handle image expansion into 4 variations
   const handleImageExpand = useCallback(async (id: string) => {
@@ -485,6 +492,7 @@ export default function ImageCanvas() {
               onSelect={handleImageSelect}
               onDuplicate={handleImageDuplicate}
               onExpand={handleImageExpand}
+              onImageLoad={handleImageLoad}
               isOrganizing={isOrganizing}
             />
           ))}

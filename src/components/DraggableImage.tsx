@@ -11,10 +11,11 @@ interface DraggableImageProps {
   onSelect: (id: string) => void;
   onDuplicate: (id: string) => void;
   onExpand: (id: string) => void;
+  onImageLoad: (id: string) => void;
   isOrganizing: boolean;
 }
 
-export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, isOrganizing }: DraggableImageProps) {
+export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, onImageLoad, isOrganizing }: DraggableImageProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const nodeRef = useRef(null);
@@ -56,6 +57,10 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSelect(image.id);
+  };
+
+  const handleImageLoad = () => {
+    onImageLoad(image.id);
   };
 
   return (
@@ -100,6 +105,7 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
               isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
             } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
             draggable={false}
+            onLoad={handleImageLoad}
             onDragStart={(e) => e.preventDefault()} // Prevent image drag
             style={{ 
               userSelect: 'none',
