@@ -6,6 +6,13 @@ import PromptInput from './PromptInput';
 import { CanvasImage, GridConfig } from '../types';
 import { AIService } from '../services/aiService';
 
+// Grid layout constants
+const GRID_GAP = 20;
+const GRID_START_X = 50;
+const GRID_START_Y = 150;
+const STANDARD_IMAGE_SIZE = 256;
+const GRID_RIGHT_PADDING = 50;
+
 export default function ImageCanvas() {
   const [images, setImages] = useState<CanvasImage[]>([]);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
@@ -26,10 +33,9 @@ export default function ImageCanvas() {
 
   // Grid configuration
   const gridConfig: GridConfig = {
-    columns: 4,
-    gap: 20,
-    startX: 50,
-    startY: 150,
+    gap: GRID_GAP,
+    startX: GRID_START_X,
+    startY: GRID_START_Y,
   };
 
   // Generate unique ID for new images
@@ -232,17 +238,22 @@ export default function ImageCanvas() {
 
   // Organize images in a grid
   const organizeInGrid = useCallback(() => {
-    const standardSize = 256;
     setIsOrganizing(true);
     
+    // Calculate dynamic columns based on window width
+    const windowWidth = window.innerWidth;
+    const availableWidth = windowWidth - gridConfig.startX - GRID_RIGHT_PADDING;
+    const itemWidthWithGap = STANDARD_IMAGE_SIZE + gridConfig.gap;
+    const calculatedColumns = Math.max(1, Math.floor(availableWidth / itemWidthWithGap));
+    
     setImages(prev => prev.map((img, index) => {
-      const row = Math.floor(index / gridConfig.columns);
-      const col = index % gridConfig.columns;
+      const row = Math.floor(index / calculatedColumns);
+      const col = index % calculatedColumns;
       
       return {
         ...img,
-        x: gridConfig.startX + col * (standardSize + gridConfig.gap),
-        y: gridConfig.startY + row * (standardSize + gridConfig.gap),
+        x: gridConfig.startX + col * (STANDARD_IMAGE_SIZE + gridConfig.gap),
+        y: gridConfig.startY + row * (STANDARD_IMAGE_SIZE + gridConfig.gap),
       };
     }));
     

@@ -11,7 +11,6 @@ export interface CanvasImage {
 }
 
 export interface GridConfig {
-  columns: number;
   gap: number;
   startX: number;
   startY: number;
