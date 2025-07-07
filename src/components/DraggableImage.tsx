@@ -82,21 +82,41 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, isOr
         />
         
         {/* Image */}
-        <img
-          src={image.src}
-          alt={image.prompt || 'Generated image'}
-          className={`w-full h-full object-cover rounded-lg transition-transform duration-200 ${
+        {image.src ? (
+          <img
+            src={image.src}
+            alt={image.prompt || 'Generated image'}
+            className={`w-full h-full object-cover rounded-lg transition-transform duration-200 ${
+              isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
+            } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()} // Prevent image drag
+            style={{ 
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+            }}
+          />
+        ) : (
+          <div className={`w-full h-full bg-gray-200 rounded-lg flex items-center justify-center transition-transform duration-200 ${
             isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
-          } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
-          draggable={false}
-          onDragStart={(e) => e.preventDefault()} // Prevent image drag
-          style={{ 
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            MozUserSelect: 'none',
-            msUserSelect: 'none',
-          }}
-        />
+          } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}>
+            <div className="text-center text-gray-500">
+              <div className="text-4xl mb-2">🎨</div>
+              <p className="text-sm">Loading...</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Small corner loading indicator */}
+        {image.isGenerating && (
+          <div className="absolute top-2 left-2 z-30">
+            <div className="bg-blue-500 bg-opacity-90 rounded-full p-1.5 shadow-lg">
+              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+            </div>
+          </div>
+        )}
         
         {/* Controls */}
         {showControls && (
