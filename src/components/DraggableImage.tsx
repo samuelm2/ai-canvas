@@ -88,9 +88,7 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, isOr
             alt={image.prompt || 'Generated image'}
             className={`w-full h-full object-cover rounded-lg transition-transform duration-200 ${
               isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
-            } ${image.selected ? 'ring-4 ring-blue-500' : ''} ${
-              image.isGenerating ? 'opacity-50' : ''
-            }`}
+            } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
             draggable={false}
             onDragStart={(e) => e.preventDefault()} // Prevent image drag
             style={{ 
@@ -111,12 +109,11 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, isOr
           </div>
         )}
         
-        {/* Loading Overlay */}
+        {/* Small corner loading indicator */}
         {image.isGenerating && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
-            <div className="text-center text-white">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-              <p className="text-sm font-medium">Generating...</p>
+          <div className="absolute top-2 left-2 z-30">
+            <div className="bg-blue-500 bg-opacity-90 rounded-full p-1.5 shadow-lg">
+              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
             </div>
           </div>
         )}
@@ -136,7 +133,7 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, isOr
         )}
         
         {/* Prompt tooltip */}
-        {image.prompt && showControls && !image.isGenerating && (
+        {image.prompt && showControls && (
           <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-2 rounded-b-lg">
             {image.prompt}
           </div>

@@ -6,7 +6,7 @@ const FAI_API_URL = 'https://fal.run/fal-ai/flux/schnell';
 export class AIService {
   private static apiKey = process.env.NEXT_PUBLIC_FAI_API_KEY || '';
 
-  static async generateImage(prompt: string): Promise<AIImageResponse> {
+  static async generateImage(prompt: string, abortSignal?: AbortSignal): Promise<AIImageResponse> {
     try {
       if (!this.apiKey) {
         throw new Error('FAI API key is not configured');
@@ -25,6 +25,7 @@ export class AIService {
             'Authorization': `Key ${this.apiKey}`,
             'Content-Type': 'application/json',
           },
+          signal: abortSignal,
         }
       );
 
@@ -37,6 +38,14 @@ export class AIService {
         throw new Error('No images returned from API');
       }
     } catch (error: any) {
+      // Handle cancellation gracefully
+      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+        return {
+          success: false,
+          error: 'Request cancelled',
+        };
+      }
+      
       console.error('Error generating image:', error);
       
       let errorMessage = 'Failed to generate image';
@@ -54,17 +63,36 @@ export class AIService {
   }
 
   // Fallback method for development/demo purposes
-  static async generateDemoImage(prompt: string): Promise<AIImageResponse> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Return a placeholder image from Unsplash based on prompt keywords
-    const keywords = prompt.toLowerCase().split(' ').join(',');
-    const imageUrl = `https://picsum.photos/512/512?random=${Math.floor(Math.random() * 1000)}`;
-    
-    return {
-      success: true,
-      imageUrl,
-    };
+  static async generateDemoImage(prompt: string, abortSignal?: AbortSignal): Promise<AIImageResponse> {
+    try {
+      // Simulate API delay with cancellation support
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(resolve, 2000);
+        
+        if (abortSignal) {
+          abortSignal.addEventListener('abort', () => {
+            clearTimeout(timeout);
+            reject(new DOMException('Request cancelled', 'AbortError'));
+          });
+        }
+      });
+      
+      // Return a placeholder image from Unsplash based on prompt keywords
+      const keywords = prompt.toLowerCase().split(' ').join(',');
+      const imageUrl = `https://picsum.photos/512/512?random=${Math.floor(Math.random() * 1000)}`;
+      
+      return {
+        success: true,
+        imageUrl,
+      };
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Request cancelled',
+        };
+      }
+      throw error;
+    }
   }
 } 

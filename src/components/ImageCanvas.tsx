@@ -13,9 +13,12 @@ export default function ImageCanvas() {
   const [isOrganizing, setIsOrganizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Manual debounce control
+  // Simple debounce control
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isUserInputRef = useRef(false);
+  
+  // Track active requests for cancellation
+  const activeRequestsRef = useRef<Map<string, AbortController>>(new Map());
   
   // Check if running in demo mode
   const hasApiKey = process.env.NEXT_PUBLIC_FAI_API_KEY && process.env.NEXT_PUBLIC_FAI_API_KEY.trim() !== '';
@@ -43,23 +46,33 @@ export default function ImageCanvas() {
     // Mark this as user input
     isUserInputRef.current = true;
     
-    // Clear existing timeout
+    // Clear existing timers
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
     
-    // Set new timeout for debounced generation
+    // Set debounce timer for when user stops typing
     debounceTimeoutRef.current = setTimeout(() => {
-      if (isUserInputRef.current && newPrompt.trim()) {
-        if (selectedImageId) {
-          updateSelectedTile(newPrompt);
-        } else {
-          createNewTile(newPrompt);
-        }
-      }
       isUserInputRef.current = false;
-    }, 1000);
+      
+      // Process final prompt
+      if (selectedImageId) {
+        updateSelectedTile(newPrompt);
+      } else {
+        createNewTile(newPrompt);
+      }
+    }, 300);
+    
   }, [selectedImageId]);
+
+  // Cancel any active request for a tile
+  const cancelActiveRequest = (tileId: string) => {
+    const activeController = activeRequestsRef.current.get(tileId);
+    if (activeController) {
+      activeController.abort();
+      activeRequestsRef.current.delete(tileId);
+    }
+  };
 
   // Create a new tile
   const createNewTile = async (prompt: string) => {
@@ -89,6 +102,9 @@ export default function ImageCanvas() {
   const updateSelectedTile = async (prompt: string) => {
     if (!selectedImageId) return;
     
+    // Cancel any existing request for this tile
+    cancelActiveRequest(selectedImageId);
+    
     // Update the tile's prompt and mark as generating
     setImages(prev => prev.map(img => 
       img.id === selectedImageId 
@@ -102,10 +118,20 @@ export default function ImageCanvas() {
 
   // Generate image for a specific tile
   const generateImageForTile = async (tileId: string, prompt: string) => {
+    // Cancel any existing request for this tile
+    cancelActiveRequest(tileId);
+    
+    // Create new abort controller for this request
+    const abortController = new AbortController();
+    activeRequestsRef.current.set(tileId, abortController);
+    
     try {
       const result = useDemoMode 
-        ? await AIService.generateDemoImage(prompt)
-        : await AIService.generateImage(prompt);
+        ? await AIService.generateDemoImage(prompt, abortController.signal)
+        : await AIService.generateImage(prompt, abortController.signal);
+      
+      // Remove from active requests if not already cancelled
+      activeRequestsRef.current.delete(tileId);
       
       if (result.success && result.imageUrl) {
         setImages(prev => prev.map(img => 
@@ -113,7 +139,8 @@ export default function ImageCanvas() {
             ? { ...img, src: result.imageUrl!, isGenerating: false }
             : img
         ));
-      } else {
+      } else if (result.error !== 'Request cancelled') {
+        // Only show error if it wasn't cancelled
         setError(result.error || 'Failed to generate image');
         setImages(prev => prev.map(img => 
           img.id === tileId 
@@ -121,13 +148,18 @@ export default function ImageCanvas() {
             : img
         ));
       }
-    } catch (err) {
-      setError('Network error occurred');
-      setImages(prev => prev.map(img => 
-        img.id === tileId 
-          ? { ...img, isGenerating: false }
-          : img
-      ));
+    } catch (err: any) {
+      // Remove from active requests
+      activeRequestsRef.current.delete(tileId);
+      
+      if (err.name !== 'AbortError') {
+        setError('Network error occurred');
+        setImages(prev => prev.map(img => 
+          img.id === tileId 
+            ? { ...img, isGenerating: false }
+            : img
+        ));
+      }
     }
   };
 
@@ -168,6 +200,9 @@ export default function ImageCanvas() {
 
   // Handle image deletion
   const handleImageDelete = useCallback((id: string) => {
+    // Cancel any active request for this tile
+    cancelActiveRequest(id);
+    
     setImages(prev => prev.filter(img => img.id !== id));
     // If deleting the selected image, clear selection and prompt
     if (selectedImageId === id) {
@@ -198,12 +233,17 @@ export default function ImageCanvas() {
 
   // Clear all images
   const clearCanvas = useCallback(() => {
+    // Cancel all active requests
+    activeRequestsRef.current.forEach(controller => controller.abort());
+    activeRequestsRef.current.clear();
+    
     setImages([]);
     setError(null);
     setSelectedImageId(null);
     isUserInputRef.current = false; // Prevent generation
     setCurrentPrompt('');
-    // Clear any pending timeout
+    
+    // Clear any pending timers
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
@@ -214,9 +254,14 @@ export default function ImageCanvas() {
     setError(null);
   }, []);
 
-  // Cleanup timeout on unmount
+  // Cleanup timers and active requests on unmount
   useEffect(() => {
     return () => {
+      // Cancel all active requests
+      activeRequestsRef.current.forEach(controller => controller.abort());
+      activeRequestsRef.current.clear();
+      
+      // Clear all timers
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
@@ -242,14 +287,14 @@ export default function ImageCanvas() {
             <PromptInput 
               value={currentPrompt}
               onChange={handlePromptChange}
-              placeholder={selectedImageId ? "Edit prompt to update selected image..." : "Type to create a new image..."}
+              placeholder={selectedImageId ? "Edit prompt to live-update selected image..." : "Type to create a new image..."}
               showSubmitButton={false}
               className="mb-2"
             />
             <div className="text-xs text-gray-500 text-center">
               {selectedImageId ? 
-                `Editing: ${selectedImage?.prompt || 'Selected image'}` : 
-                'Type above to create a new image tile'
+                `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.isGenerating ? '(updating...)' : ''}` : 
+                'Type above to create a new image tile • Updates after you finish typing'
               }
             </div>
           </div>
