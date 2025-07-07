@@ -10,10 +10,11 @@ interface DraggableImageProps {
   onDelete: (id: string) => void;
   onSelect: (id: string) => void;
   onDuplicate: (id: string) => void;
+  onExpand: (id: string) => void;
   isOrganizing: boolean;
 }
 
-export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDuplicate, isOrganizing }: DraggableImageProps) {
+export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, isOrganizing }: DraggableImageProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const nodeRef = useRef(null);
@@ -45,6 +46,11 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
   const handleDuplicate = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDuplicate(image.id);
+  };
+
+  const handleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onExpand(image.id);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -125,6 +131,14 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
         {/* Controls */}
         {showControls && (
           <div className="absolute -top-2 -right-2 flex gap-1 z-30">
+            <button
+              onClick={handleExpand}
+              onMouseDown={(e) => e.stopPropagation()} // Prevent interference with drag
+              className="bg-purple-500 hover:bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors"
+              title="Expand into 4 variations"
+            >
+              !
+            </button>
             <button
               onClick={handleDuplicate}
               onMouseDown={(e) => e.stopPropagation()} // Prevent interference with drag

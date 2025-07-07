@@ -1,42 +1,29 @@
 import axios from 'axios';
 import { AIImageResponse } from '../types';
 
-const FAI_API_URL = 'https://fal.run/fal-ai/flux/schnell';
-
 export class AIService {
-  private static apiKey = process.env.NEXT_PUBLIC_FAI_API_KEY || '';
-
   static async generateImage(prompt: string, abortSignal?: AbortSignal): Promise<AIImageResponse> {
     try {
-      if (!this.apiKey) {
-        throw new Error('FAI API key is not configured');
+      if (!prompt || prompt.trim() === '') {
+        throw new Error('Prompt is required and cannot be empty');
       }
-
+      
+      // Call our secure API route instead of external API directly
       const response = await axios.post(
-        FAI_API_URL,
-        {
-          prompt,
-          image_size: 'square_hd',
-          num_images: 1,
-          enable_safety_checker: true,
-        },
-        {
+        '/api/generate-image',
+        { prompt: prompt.trim() },
+        { 
           headers: {
-            'Authorization': `Key ${this.apiKey}`,
             'Content-Type': 'application/json',
           },
-          signal: abortSignal,
+          signal: abortSignal 
         }
       );
 
-      if (response.data && response.data.images && response.data.images.length > 0) {
-        return {
-          success: true,
-          imageUrl: response.data.images[0].url,
-        };
-      } else {
-        throw new Error('No images returned from API');
-      }
+      return {
+        success: true,
+        imageUrl: response.data.imageUrl,
+      };
     } catch (error: any) {
       // Handle cancellation gracefully
       if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
@@ -49,8 +36,8 @@ export class AIService {
       console.error('Error generating image:', error);
       
       let errorMessage = 'Failed to generate image';
-      if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -62,37 +49,44 @@ export class AIService {
     }
   }
 
-  // Fallback method for development/demo purposes
-  static async generateDemoImage(prompt: string, abortSignal?: AbortSignal): Promise<AIImageResponse> {
+  // Generate 4 prompt variations using our secure API route
+  static async generatePromptVariations(originalPrompt: string, abortSignal?: AbortSignal): Promise<{ success: boolean; variations?: string[]; error?: string }> {
     try {
-      // Simulate API delay with cancellation support
-      await new Promise((resolve, reject) => {
-        const timeout = setTimeout(resolve, 2000);
-        
-        if (abortSignal) {
-          abortSignal.addEventListener('abort', () => {
-            clearTimeout(timeout);
-            reject(new DOMException('Request cancelled', 'AbortError'));
-          });
+      if (!originalPrompt || originalPrompt.trim() === '') {
+        throw new Error('Original prompt is required and cannot be empty');
+      }
+      
+      // Call our secure API route instead of external API directly
+      const response = await axios.post(
+        '/api/generate-variations',
+        { prompt: originalPrompt.trim() },
+        { 
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: abortSignal 
         }
-      });
-      
-      // Return a placeholder image from Unsplash based on prompt keywords
-      const keywords = prompt.toLowerCase().split(' ').join(',');
-      const imageUrl = `https://picsum.photos/512/512?random=${Math.floor(Math.random() * 1000)}`;
-      
+      );
+
       return {
         success: true,
-        imageUrl,
+        variations: response.data.variations,
       };
     } catch (error: any) {
-      if (error.name === 'AbortError') {
+      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
         return {
           success: false,
           error: 'Request cancelled',
         };
       }
-      throw error;
+      
+      console.error('Error generating prompt variations:', error);
+      
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Failed to generate variations',
+      };
     }
   }
+
 } 

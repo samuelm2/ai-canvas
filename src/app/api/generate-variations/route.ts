@@ -1,0 +1,105 @@
+import { NextRequest, NextResponse } from 'next/server';
+import axios from 'axios';
+
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+export async function POST(request: NextRequest) {
+  try {
+    // Add error handling for JSON parsing
+    let body;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+
+    const { prompt } = body;
+    
+    if (!prompt) {
+      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+    }
+
+    const apiKey = process.env.OPENAI_API_KEY; // No NEXT_PUBLIC_ prefix!
+    
+    if (!apiKey) {
+      // Fallback to demo variations if no API key
+      const demoVariations = [
+        `${prompt}, artistic oil painting style`,
+        `${prompt}, cyberpunk neon aesthetic`,
+        `${prompt}, watercolor illustration`,
+        `${prompt}, minimalist black and white photography`
+      ];
+      
+      return NextResponse.json({
+        success: true,
+        variations: demoVariations,
+      });
+    }
+
+    const response = await axios.post(
+      OPENAI_API_URL,
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a creative AI assistant that generates image prompt variations. Given an original image prompt, create 4 different variations that explore different artistic styles, moods, or creative interpretations while maintaining the core subject matter. Each variation should be distinct and creative.'
+          },
+          {
+            role: 'user',
+            content: `Create 4 creative variations of this image prompt: "${prompt}"\n\nReturn only the 4 variations, one per line, without numbering or additional text.`
+          }
+        ],
+        max_tokens: 300,
+        temperature: 0.8,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const content = response.data.choices[0]?.message?.content;
+    if (!content) {
+      return NextResponse.json({ error: 'No response from OpenAI API' }, { status: 500 });
+    }
+
+    // Parse variations from response
+    const variations = content.split('\n').filter((line: string) => line.trim()).slice(0, 4);
+    
+    if (variations.length < 4) {
+      // Pad with demo variations if needed
+      const demoVariations = [
+        `${prompt}, artistic oil painting style`,
+        `${prompt}, cyberpunk neon aesthetic`,
+        `${prompt}, watercolor illustration`,
+        `${prompt}, minimalist black and white photography`
+      ];
+      const additionalVariations = demoVariations.slice(0, 4 - variations.length);
+      variations.push(...additionalVariations);
+    }
+
+    return NextResponse.json({
+      success: true,
+      variations,
+    });
+  } catch (error: any) {
+    console.error('Error generating prompt variations:', error);
+    
+    // Fallback to demo variations on error
+    const demoVariations = [
+      `${prompt}, artistic oil painting style`,
+      `${prompt}, cyberpunk neon aesthetic`,
+      `${prompt}, watercolor illustration`,
+      `${prompt}, minimalist black and white photography`
+    ];
+    
+    return NextResponse.json({
+      success: true,
+      variations: demoVariations,
+    });
+  }
+} 

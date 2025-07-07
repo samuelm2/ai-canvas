@@ -27,9 +27,7 @@ export default function ImageCanvas() {
   // Track active requests for cancellation
   const activeRequestsRef = useRef<Map<string, AbortController>>(new Map());
   
-  // Check if running in demo mode
-  const hasApiKey = process.env.NEXT_PUBLIC_FAI_API_KEY && process.env.NEXT_PUBLIC_FAI_API_KEY.trim() !== '';
-  const useDemoMode = !hasApiKey || process.env.NEXT_PUBLIC_USE_DEMO_MODE === 'true';
+  // Demo mode is now handled automatically on the server side
 
   // Grid configuration
   const gridConfig: GridConfig = {
@@ -124,6 +122,11 @@ export default function ImageCanvas() {
 
   // Generate image for a specific tile
   const generateImageForTile = async (tileId: string, prompt: string) => {
+    if (!prompt || prompt.trim() === '') {
+      setError('Cannot generate image with empty prompt');
+      return;
+    }
+    
     // Cancel any existing request for this tile
     cancelActiveRequest(tileId);
     
@@ -132,9 +135,8 @@ export default function ImageCanvas() {
     activeRequestsRef.current.set(tileId, abortController);
     
     try {
-      const result = useDemoMode 
-        ? await AIService.generateDemoImage(prompt, abortController.signal)
-        : await AIService.generateImage(prompt, abortController.signal);
+      // Always call generateImage - server handles demo mode automatically
+      const result = await AIService.generateImage(prompt, abortController.signal);
       
       // Remove from active requests if not already cancelled
       activeRequestsRef.current.delete(tileId);
@@ -236,6 +238,79 @@ export default function ImageCanvas() {
     setImages(prev => [...prev, newImage]);
   }, [images]);
 
+  // Handle image expansion into 4 variations
+  const handleImageExpand = useCallback(async (id: string) => {
+    const imageToExpand = images.find(img => img.id === id);
+    if (!imageToExpand) return;
+    
+    const prompt = imageToExpand.prompt;
+    if (!prompt) return;
+    
+    try {
+      // Generate 4 prompt variations
+      const variationsResult = await AIService.generatePromptVariations(prompt);
+      
+      if (!variationsResult.success || !variationsResult.variations) {
+        setError('Failed to generate prompt variations');
+        return;
+      }
+      
+      // Create 4 new images positioned around the original in a cross pattern
+      const crossSpacing = STANDARD_IMAGE_SIZE + GRID_GAP * 2;
+      
+      const expandedImages: CanvasImage[] = variationsResult.variations.map((prompt, index) => {
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        // Position in cross pattern, adjust only if original position would be negative
+        switch (index) {
+          case 0: // Above
+            offsetX = 0;
+            // If placing above would result in negative Y, place below with extra spacing
+            offsetY = (imageToExpand.y - crossSpacing < 0) ? crossSpacing * 2 : -crossSpacing;
+            break;
+          case 1: // Left
+            // If placing left would result in negative X, place right with extra spacing
+            offsetX = (imageToExpand.x - crossSpacing < 0) ? crossSpacing * 2 : -crossSpacing;
+            offsetY = 0;
+            break;
+          case 2: // Right (normal)
+            offsetX = crossSpacing;
+            offsetY = 0;
+            break;
+          case 3: // Below (normal)
+            offsetX = 0;
+            offsetY = crossSpacing;
+            break;
+        }
+        
+        return {
+          id: generateId(),
+          src: '',
+          x: imageToExpand.x + offsetX,
+          y: imageToExpand.y + offsetY,
+          width: STANDARD_IMAGE_SIZE,
+          height: STANDARD_IMAGE_SIZE,
+          prompt,
+          selected: false,
+          isGenerating: true,
+        };
+      });
+      
+      // Add the new images to the canvas
+      setImages(prev => [...prev, ...expandedImages]);
+      
+      // Generate images for each variation
+      expandedImages.forEach(async (image) => {
+        await generateImageForTile(image.id, image.prompt!);
+      });
+      
+    } catch (error) {
+      console.error('Error expanding image:', error);
+      setError('Failed to expand image');
+    }
+  }, [images]);
+
   // Organize images in a grid
   const organizeInGrid = useCallback(() => {
     setIsOrganizing(true);
@@ -304,11 +379,9 @@ export default function ImageCanvas() {
         <div className="flex flex-col items-center gap-4">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-800">AI Image Canvas</h1>
-            {useDemoMode && (
-              <p className="text-sm text-orange-600 mt-1">
-                🧪 Demo Mode - Using placeholder images (Add FAI API key for real AI generation)
-              </p>
-            )}
+            <p className="text-sm text-blue-600 mt-1">
+              🤖 Server automatically uses demo images when no API key is configured
+            </p>
           </div>
           
           {/* Live Prompt Input */}
@@ -373,41 +446,45 @@ export default function ImageCanvas() {
 
       {/* Canvas Area */}
       <div 
-        className="absolute inset-0 pt-52"
+        className="absolute inset-0 pt-52 overflow-auto"
         onClick={handleCanvasClick}
       >
-        {/* Grid Guidelines (subtle) */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="grid grid-cols-12 gap-4 h-full">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="border-r border-gray-300" />
-            ))}
-          </div>
-        </div>
-
-        {/* Instructions */}
-        {images.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-gray-500">
-              <div className="text-6xl mb-4">🎨</div>
-              <h2 className="text-xl font-semibold mb-2">Start Typing to Create</h2>
-              <p className="text-sm">Enter a prompt above to generate your first image tile</p>
+        {/* Scrollable Canvas Container */}
+        <div className="relative min-w-full min-h-full">
+          {/* Grid Guidelines (subtle) */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <div className="grid grid-cols-12 gap-4 h-full">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} className="border-r border-gray-300" />
+              ))}
             </div>
           </div>
-        )}
 
-        {/* Draggable Images */}
-        {images.map((image) => (
-          <DraggableImage
-            key={image.id}
-            image={image}
-            onDrag={handleImageDrag}
-            onDelete={handleImageDelete}
-            onSelect={handleImageSelect}
-            onDuplicate={handleImageDuplicate}
-            isOrganizing={isOrganizing}
-          />
-        ))}
+          {/* Instructions */}
+          {images.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <div className="text-6xl mb-4">🎨</div>
+                <h2 className="text-xl font-semibold mb-2">Start Typing to Create</h2>
+                <p className="text-sm">Enter a prompt above to generate your first image tile</p>
+              </div>
+            </div>
+          )}
+
+          {/* Draggable Images */}
+          {images.map((image) => (
+            <DraggableImage
+              key={image.id}
+              image={image}
+              onDrag={handleImageDrag}
+              onDelete={handleImageDelete}
+              onSelect={handleImageSelect}
+              onDuplicate={handleImageDuplicate}
+              onExpand={handleImageExpand}
+              isOrganizing={isOrganizing}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Stats */}
