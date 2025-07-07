@@ -11,6 +11,7 @@ export default function ImageCanvas() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOrganizing, setIsOrganizing] = useState(false);
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   
   // Check if running in demo mode
   const hasApiKey = process.env.NEXT_PUBLIC_FAI_API_KEY && process.env.NEXT_PUBLIC_FAI_API_KEY.trim() !== '';
@@ -68,10 +69,33 @@ export default function ImageCanvas() {
     ));
   }, []);
 
+  // Handle image selection
+  const handleImageSelect = useCallback((id: string) => {
+    setSelectedImageId(id);
+    setImages(prev => prev.map(img => 
+      ({ ...img, selected: img.id === id })
+    ));
+  }, []);
+
+  // Handle deselection (clicking on canvas background)
+  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
+    // Only deselect if clicking the canvas directly, not on an image
+    if (e.target === e.currentTarget) {
+      setSelectedImageId(null);
+      setImages(prev => prev.map(img => 
+        ({ ...img, selected: false })
+      ));
+    }
+  }, []);
+
   // Handle image deletion
   const handleImageDelete = useCallback((id: string) => {
     setImages(prev => prev.filter(img => img.id !== id));
-  }, []);
+    // If deleting the selected image, clear selection
+    if (selectedImageId === id) {
+      setSelectedImageId(null);
+    }
+  }, [selectedImageId]);
 
   // Organize images in a grid
   const organizeInGrid = useCallback(() => {
@@ -103,6 +127,7 @@ export default function ImageCanvas() {
   const clearCanvas = useCallback(() => {
     setImages([]);
     setError(null);
+    setSelectedImageId(null);
   }, []);
 
   // Dismiss error
@@ -169,7 +194,10 @@ export default function ImageCanvas() {
       )}
 
       {/* Canvas Area */}
-      <div className="absolute inset-0 pt-40">
+      <div 
+        className="absolute inset-0 pt-40"
+        onClick={handleCanvasClick}
+      >
         {/* Grid Guidelines (subtle) */}
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="grid grid-cols-12 gap-4 h-full">
@@ -197,6 +225,7 @@ export default function ImageCanvas() {
             image={image}
             onDrag={handleImageDrag}
             onDelete={handleImageDelete}
+            onSelect={handleImageSelect}
             isOrganizing={isOrganizing}
           />
         ))}

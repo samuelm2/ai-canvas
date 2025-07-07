@@ -8,13 +8,17 @@ interface DraggableImageProps {
   image: CanvasImage;
   onDrag: (id: string, x: number, y: number) => void;
   onDelete: (id: string) => void;
+  onSelect: (id: string) => void;
   isOrganizing: boolean;
 }
 
-export default function DraggableImage({ image, onDrag, onDelete, isOrganizing }: DraggableImageProps) {
+export default function DraggableImage({ image, onDrag, onDelete, onSelect, isOrganizing }: DraggableImageProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [showControls, setShowControls] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const nodeRef = useRef(null);
+
+  // Calculate if controls should be shown (hover OR selected) AND not dragging
+  const showControls = (isHovered || image.selected) && !isDragging;
 
   const handleDrag = (e: any, data: any) => {
     onDrag(image.id, data.x, data.y);
@@ -22,6 +26,8 @@ export default function DraggableImage({ image, onDrag, onDelete, isOrganizing }
 
   const handleStart = () => {
     setIsDragging(true);
+    // Select image when starting to drag
+    onSelect(image.id);
     // Controls will be hidden by the conditional render (!isDragging)
   };
 
@@ -34,6 +40,13 @@ export default function DraggableImage({ image, onDrag, onDelete, isOrganizing }
     e.stopPropagation();
     onDelete(image.id);
   };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(image.id);
+  };
+
+
 
   return (
     <Draggable
@@ -58,8 +71,9 @@ export default function DraggableImage({ image, onDrag, onDelete, isOrganizing }
           MozUserSelect: 'none',
           msUserSelect: 'none',
         }}
-        onMouseEnter={() => setShowControls(true)}
-        onMouseLeave={() => setShowControls(false)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleClick}
       >
         {/* Drag Handle */}
         <div 
@@ -71,9 +85,9 @@ export default function DraggableImage({ image, onDrag, onDelete, isOrganizing }
         <img
           src={image.src}
           alt={image.prompt || 'Generated image'}
-          className={`w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-200 ${
+          className={`w-full h-full object-cover rounded-lg transition-transform duration-200 ${
             isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
-          }`}
+          } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
           draggable={false}
           onDragStart={(e) => e.preventDefault()} // Prevent image drag
           style={{ 
@@ -85,7 +99,7 @@ export default function DraggableImage({ image, onDrag, onDelete, isOrganizing }
         />
         
         {/* Controls */}
-        {showControls && !isDragging && (
+        {showControls && (
           <div className="absolute -top-2 -right-2 flex gap-1 z-30">
             <button
               onClick={handleDelete}

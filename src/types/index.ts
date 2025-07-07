@@ -6,6 +6,7 @@ export interface CanvasImage {
   width: number;
   height: number;
   prompt?: string;
+  selected?: boolean;
 }
 
 export interface GridConfig {
