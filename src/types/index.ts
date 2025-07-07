@@ -1,3 +1,5 @@
+export type ImageLoadingState = 'waitingOnAPI' | 'urlLoading' | 'finished';
+
 export interface CanvasImage {
   id: string;
   src: string;
@@ -7,7 +9,7 @@ export interface CanvasImage {
   height: number;
   prompt?: string;
   selected?: boolean;
-  isGenerating?: boolean;
+  loadingState?: ImageLoadingState;
 }
 
 export interface GridConfig {

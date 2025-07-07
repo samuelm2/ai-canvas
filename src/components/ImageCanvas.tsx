@@ -27,6 +27,16 @@ export default function ImageCanvas() {
   // Track active requests for cancellation
   const activeRequestsRef = useRef<Map<string, AbortController>>(new Map());
   
+  // Helper function to preload an image
+  const preloadImage = (url: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = url;
+    });
+  };
+  
   // Demo mode is now handled automatically on the server side
 
   // Grid configuration
@@ -92,7 +102,7 @@ export default function ImageCanvas() {
       height: 256,
       prompt,
       selected: true,
-      isGenerating: true,
+      loadingState: 'waitingOnAPI',
     };
     
     setImages(prev => [...prev, newImage]);
@@ -112,7 +122,7 @@ export default function ImageCanvas() {
     // Update the tile's prompt and mark as generating
     setImages(prev => prev.map(img => 
       img.id === selectedImageId 
-        ? { ...img, prompt, isGenerating: true }
+        ? { ...img, prompt, loadingState: 'waitingOnAPI' }
         : img
     ));
     
@@ -142,17 +152,38 @@ export default function ImageCanvas() {
       activeRequestsRef.current.delete(tileId);
       
       if (result.success && result.imageUrl) {
+        // Set state to urlLoading but don't update src yet
         setImages(prev => prev.map(img => 
           img.id === tileId 
-            ? { ...img, src: result.imageUrl!, isGenerating: false }
+            ? { ...img, loadingState: 'urlLoading' }
             : img
         ));
+        
+        // Preload the image
+        try {
+          await preloadImage(result.imageUrl);
+          
+          // Only update src after image is fully loaded
+          setImages(prev => prev.map(img => 
+            img.id === tileId 
+              ? { ...img, src: result.imageUrl!, loadingState: 'finished' }
+              : img
+          ));
+        } catch (error) {
+          console.error('Failed to preload image:', error);
+          setError('Failed to load image');
+          setImages(prev => prev.map(img => 
+            img.id === tileId 
+              ? { ...img, loadingState: 'finished' }
+              : img
+          ));
+        }
       } else if (result.error !== 'Request cancelled') {
         // Only show error if it wasn't cancelled
         setError(result.error || 'Failed to generate image');
         setImages(prev => prev.map(img => 
           img.id === tileId 
-            ? { ...img, isGenerating: false }
+            ? { ...img, loadingState: 'finished' }
             : img
         ));
       }
@@ -232,11 +263,13 @@ export default function ImageCanvas() {
       x: imageToDuplicate.x + 30, // Offset to the right
       y: imageToDuplicate.y + 30, // Offset down
       selected: false, // Don't select the duplicate
-      isGenerating: false, // Not generating since we're copying existing image
+      loadingState: 'finished', // Not generating since we're copying existing image
     };
     
     setImages(prev => [...prev, newImage]);
   }, [images]);
+
+
 
   // Handle image expansion into 4 variations
   const handleImageExpand = useCallback(async (id: string) => {
@@ -246,70 +279,83 @@ export default function ImageCanvas() {
     const prompt = imageToExpand.prompt;
     if (!prompt) return;
     
+    // Create placeholder tiles immediately for better UX
+    const crossSpacing = STANDARD_IMAGE_SIZE + GRID_GAP * 2;
+    const negativeThreshold = STANDARD_IMAGE_SIZE * 0.3; // 30% of image size
+    
+    const placeholderImages: CanvasImage[] = Array.from({ length: 4 }, (_, index) => {
+      let offsetX = 0;
+      let offsetY = 0;
+      
+      // Position in cross pattern, only use fallback if more than 30% would be in negative
+      switch (index) {
+        case 0: // Above
+          offsetX = 0;
+          // Only use fallback if more than 30% would be in negative Y
+          offsetY = (imageToExpand.y - crossSpacing < -negativeThreshold) ? crossSpacing * 2 : -crossSpacing;
+          break;
+        case 1: // Left
+          // Only use fallback if more than 30% would be in negative X
+          offsetX = (imageToExpand.x - crossSpacing < -negativeThreshold) ? crossSpacing * 2 : -crossSpacing;
+          offsetY = 0;
+          break;
+        case 2: // Right (normal)
+          offsetX = crossSpacing;
+          offsetY = 0;
+          break;
+        case 3: // Below (normal)
+          offsetX = 0;
+          offsetY = crossSpacing;
+          break;
+      }
+      
+      return {
+        id: generateId(),
+        src: '',
+        x: imageToExpand.x + offsetX,
+        y: imageToExpand.y + offsetY,
+        width: STANDARD_IMAGE_SIZE,
+        height: STANDARD_IMAGE_SIZE,
+        prompt: `${prompt} (generating variation...)`, // Temporary prompt
+        selected: false,
+        loadingState: 'waitingOnAPI',
+      };
+    });
+    
+    // Add placeholder images immediately
+    setImages(prev => [...prev, ...placeholderImages]);
+    
     try {
       // Generate 4 prompt variations
       const variationsResult = await AIService.generatePromptVariations(prompt);
       
       if (!variationsResult.success || !variationsResult.variations) {
         setError('Failed to generate prompt variations');
+        // Remove placeholder images on error
+        setImages(prev => prev.filter(img => !placeholderImages.some(ph => ph.id === img.id)));
         return;
       }
       
-      // Create 4 new images positioned around the original in a cross pattern
-      const crossSpacing = STANDARD_IMAGE_SIZE + GRID_GAP * 2;
-      
-      const expandedImages: CanvasImage[] = variationsResult.variations.map((prompt, index) => {
-        let offsetX = 0;
-        let offsetY = 0;
+      // Update placeholder images with actual prompts and start generation
+      placeholderImages.forEach(async (placeholderImage, index) => {
+        const actualPrompt = variationsResult.variations![index];
         
-        // Position in cross pattern, only use fallback if more than 30% would be in negative
-        const negativeThreshold = STANDARD_IMAGE_SIZE * 0.3; // 30% of image size
+        // Update the placeholder with actual prompt
+        setImages(prev => prev.map(img => 
+          img.id === placeholderImage.id 
+            ? { ...img, prompt: actualPrompt }
+            : img
+        ));
         
-        switch (index) {
-          case 0: // Above
-            offsetX = 0;
-            // Only use fallback if more than 30% would be in negative Y
-            offsetY = (imageToExpand.y - crossSpacing < -negativeThreshold) ? crossSpacing * 2 : -crossSpacing;
-            break;
-          case 1: // Left
-            // Only use fallback if more than 30% would be in negative X
-            offsetX = (imageToExpand.x - crossSpacing < -negativeThreshold) ? crossSpacing * 2 : -crossSpacing;
-            offsetY = 0;
-            break;
-          case 2: // Right (normal)
-            offsetX = crossSpacing;
-            offsetY = 0;
-            break;
-          case 3: // Below (normal)
-            offsetX = 0;
-            offsetY = crossSpacing;
-            break;
-        }
-        
-        return {
-          id: generateId(),
-          src: '',
-          x: imageToExpand.x + offsetX,
-          y: imageToExpand.y + offsetY,
-          width: STANDARD_IMAGE_SIZE,
-          height: STANDARD_IMAGE_SIZE,
-          prompt,
-          selected: false,
-          isGenerating: true,
-        };
-      });
-      
-      // Add the new images to the canvas
-      setImages(prev => [...prev, ...expandedImages]);
-      
-      // Generate images for each variation
-      expandedImages.forEach(async (image) => {
-        await generateImageForTile(image.id, image.prompt!);
+        // Generate the image
+        await generateImageForTile(placeholderImage.id, actualPrompt);
       });
       
     } catch (error) {
       console.error('Error expanding image:', error);
       setError('Failed to expand image');
+      // Remove placeholder images on error
+      setImages(prev => prev.filter(img => !placeholderImages.some(ph => ph.id === img.id)));
     }
   }, [images]);
 
@@ -397,7 +443,7 @@ export default function ImageCanvas() {
             />
             <div className="text-xs text-gray-500 text-center">
               {selectedImageId ? 
-                `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.isGenerating ? '(updating...)' : ''}` : 
+                `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.loadingState === 'waitingOnAPI' || selectedImage?.loadingState === 'urlLoading' ? '(updating...)' : ''}` : 
                 'Type above to create a new image tile • Updates after you finish typing'
               }
             </div>

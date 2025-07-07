@@ -58,6 +58,8 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
     onSelect(image.id);
   };
 
+
+
   return (
     <Draggable
       nodeRef={nodeRef}
@@ -92,13 +94,29 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
         />
         
         {/* Image */}
-        {image.src ? (
+        {image.src && image.loadingState === 'finished' ? (
           <img
             src={image.src}
             alt={image.prompt || 'Generated image'}
-            className={`w-full h-full object-cover rounded-lg transition-transform duration-200 ${
+            className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
               isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
             } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()} // Prevent image drag
+            style={{ 
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+            }}
+          />
+        ) : image.src && image.loadingState !== 'finished' ? (
+          <img
+            src={image.src}
+            alt={image.prompt || 'Generated image'}
+            className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
+              isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
+            } ${image.selected ? 'ring-4 ring-blue-500' : ''} opacity-60`}
             draggable={false}
             onDragStart={(e) => e.preventDefault()} // Prevent image drag
             style={{ 
@@ -114,13 +132,19 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
           } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}>
             <div className="text-center text-gray-500">
               <div className="text-4xl mb-2">🎨</div>
-              <p className="text-sm">Loading...</p>
+              <p className="text-sm">
+                {image.loadingState === 'waitingOnAPI' ? 'Generating...' : 
+                 image.loadingState === 'urlLoading' ? 'Loading...' : 
+                 'Loading...'}
+              </p>
             </div>
           </div>
         )}
         
+
+        
         {/* Small corner loading indicator */}
-        {image.isGenerating && (
+        {(image.loadingState === 'waitingOnAPI' || image.loadingState === 'urlLoading') && (
           <div className="absolute top-2 left-2 z-30">
             <div className="bg-blue-500 bg-opacity-90 rounded-full p-1.5 shadow-lg">
               <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
