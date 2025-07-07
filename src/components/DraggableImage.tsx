@@ -1,0 +1,110 @@
+'use client';
+
+import { useState, useRef } from 'react';
+import Draggable from 'react-draggable';
+import { CanvasImage } from '../types';
+
+interface DraggableImageProps {
+  image: CanvasImage;
+  onDrag: (id: string, x: number, y: number) => void;
+  onDelete: (id: string) => void;
+  isOrganizing: boolean;
+}
+
+export default function DraggableImage({ image, onDrag, onDelete, isOrganizing }: DraggableImageProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const nodeRef = useRef(null);
+
+  const handleDrag = (e: any, data: any) => {
+    onDrag(image.id, data.x, data.y);
+  };
+
+  const handleStart = () => {
+    setIsDragging(true);
+    // Controls will be hidden by the conditional render (!isDragging)
+  };
+
+  const handleStop = () => {
+    setIsDragging(false);
+    // Controls will reappear automatically based on hover state
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(image.id);
+  };
+
+  return (
+    <Draggable
+      nodeRef={nodeRef}
+      position={{ x: image.x, y: image.y }}
+      onDrag={handleDrag}
+      onStart={handleStart}
+      onStop={handleStop}
+      handle=".drag-handle"
+    >
+      <div 
+        ref={nodeRef}
+        className={`absolute group ${isDragging ? 'z-50' : 'z-10'}`}
+        style={{ 
+          width: image.width, 
+          height: image.height,
+          // Only add transition during grid organization, not during normal dragging
+          transition: isOrganizing ? 'transform 0.5s ease-out' : 'none',
+          // Prevent text/image selection
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none',
+        }}
+        onMouseEnter={() => setShowControls(true)}
+        onMouseLeave={() => setShowControls(false)}
+      >
+        {/* Drag Handle */}
+        <div 
+          className="drag-handle absolute inset-0 cursor-move z-20" 
+          title="Drag to move"
+        />
+        
+        {/* Image */}
+        <img
+          src={image.src}
+          alt={image.prompt || 'Generated image'}
+          className={`w-full h-full object-cover rounded-lg shadow-lg transition-transform duration-200 ${
+            isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
+          }`}
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()} // Prevent image drag
+          style={{ 
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            MozUserSelect: 'none',
+            msUserSelect: 'none',
+          }}
+        />
+        
+        {/* Controls */}
+        {showControls && !isDragging && (
+          <div className="absolute -top-2 -right-2 flex gap-1 z-30">
+            <button
+              onClick={handleDelete}
+              onMouseDown={(e) => e.stopPropagation()} // Prevent interference with drag
+              className="bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors"
+              title="Delete image"
+            >
+              ×
+            </button>
+          </div>
+        )}
+        
+        {/* Prompt tooltip */}
+        {image.prompt && showControls && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-2 rounded-b-lg">
+            {image.prompt}
+          </div>
+        )}
+      </div>
+    </Draggable>
+  );
+} 
