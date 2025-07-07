@@ -89,17 +89,9 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Error generating prompt variations:', error);
     
-    // Fallback to demo variations on error
-    const demoVariations = [
-      `${prompt}, artistic oil painting style`,
-      `${prompt}, cyberpunk neon aesthetic`,
-      `${prompt}, watercolor illustration`,
-      `${prompt}, minimalist black and white photography`
-    ];
-    
-    return NextResponse.json({
-      success: true,
-      variations: demoVariations,
-    });
+    // Return generic error since we can't guarantee prompt is in scope
+    return NextResponse.json({ 
+      error: 'Failed to generate variations' 
+    }, { status: 500 });
   }
 } 

@@ -9,7 +9,7 @@ import { AIService } from '../services/aiService';
 // Grid layout constants
 const GRID_GAP = 20;
 const GRID_START_X = 50;
-const GRID_START_Y = 150;
+const GRID_START_Y = 50; // Same as X - header compensation handled in CSS
 const STANDARD_IMAGE_SIZE = 256;
 const GRID_RIGHT_PADDING = 50;
 
@@ -262,16 +262,18 @@ export default function ImageCanvas() {
         let offsetX = 0;
         let offsetY = 0;
         
-        // Position in cross pattern, adjust only if original position would be negative
+        // Position in cross pattern, only use fallback if more than 30% would be in negative
+        const negativeThreshold = STANDARD_IMAGE_SIZE * 0.3; // 30% of image size
+        
         switch (index) {
           case 0: // Above
             offsetX = 0;
-            // If placing above would result in negative Y, place below with extra spacing
-            offsetY = (imageToExpand.y - crossSpacing < 0) ? crossSpacing * 2 : -crossSpacing;
+            // Only use fallback if more than 30% would be in negative Y
+            offsetY = (imageToExpand.y - crossSpacing < -negativeThreshold) ? crossSpacing * 2 : -crossSpacing;
             break;
           case 1: // Left
-            // If placing left would result in negative X, place right with extra spacing
-            offsetX = (imageToExpand.x - crossSpacing < 0) ? crossSpacing * 2 : -crossSpacing;
+            // Only use fallback if more than 30% would be in negative X
+            offsetX = (imageToExpand.x - crossSpacing < -negativeThreshold) ? crossSpacing * 2 : -crossSpacing;
             offsetY = 0;
             break;
           case 2: // Right (normal)
@@ -446,11 +448,13 @@ export default function ImageCanvas() {
 
       {/* Canvas Area */}
       <div 
-        className="absolute inset-0 pt-52 overflow-auto"
-        onClick={handleCanvasClick}
+        className="absolute top-52 left-0 right-0 bottom-0 overflow-auto"
       >
         {/* Scrollable Canvas Container */}
-        <div className="relative min-w-full min-h-full">
+        <div 
+          className="relative min-w-full min-h-full"
+          onClick={handleCanvasClick}
+        >
           {/* Grid Guidelines (subtle) */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="grid grid-cols-12 gap-4 h-full">
