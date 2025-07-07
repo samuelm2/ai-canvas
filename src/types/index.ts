@@ -7,6 +7,7 @@ export interface CanvasImage {
   height: number;
   prompt?: string;
   selected?: boolean;
+  isGenerating?: boolean;
 }
 
 export interface GridConfig {

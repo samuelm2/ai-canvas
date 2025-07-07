@@ -82,21 +82,44 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, isOr
         />
         
         {/* Image */}
-        <img
-          src={image.src}
-          alt={image.prompt || 'Generated image'}
-          className={`w-full h-full object-cover rounded-lg transition-transform duration-200 ${
+        {image.src ? (
+          <img
+            src={image.src}
+            alt={image.prompt || 'Generated image'}
+            className={`w-full h-full object-cover rounded-lg transition-transform duration-200 ${
+              isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
+            } ${image.selected ? 'ring-4 ring-blue-500' : ''} ${
+              image.isGenerating ? 'opacity-50' : ''
+            }`}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()} // Prevent image drag
+            style={{ 
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+            }}
+          />
+        ) : (
+          <div className={`w-full h-full bg-gray-200 rounded-lg flex items-center justify-center transition-transform duration-200 ${
             isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
-          } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
-          draggable={false}
-          onDragStart={(e) => e.preventDefault()} // Prevent image drag
-          style={{ 
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            MozUserSelect: 'none',
-            msUserSelect: 'none',
-          }}
-        />
+          } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}>
+            <div className="text-center text-gray-500">
+              <div className="text-4xl mb-2">🎨</div>
+              <p className="text-sm">Loading...</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Loading Overlay */}
+        {image.isGenerating && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
+            <div className="text-center text-white">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+              <p className="text-sm font-medium">Generating...</p>
+            </div>
+          </div>
+        )}
         
         {/* Controls */}
         {showControls && (
@@ -113,7 +136,7 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, isOr
         )}
         
         {/* Prompt tooltip */}
-        {image.prompt && showControls && (
+        {image.prompt && showControls && !image.isGenerating && (
           <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-2 rounded-b-lg">
             {image.prompt}
           </div>
