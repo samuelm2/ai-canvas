@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Draggable from 'react-draggable';
-import { CanvasImage } from '../types';
+import { CanvasImage, ImageLoadingState } from '../types';
 
 interface DraggableImageProps {
   image: CanvasImage;
@@ -97,7 +97,7 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
         />
         
         {/* Image */}
-        {image.src ? (
+        {image.src && image.loadingState === 'finished' ? (
           <img
             src={image.src}
             alt={image.prompt || 'Generated image'}
@@ -105,7 +105,6 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
               isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
             } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
             draggable={false}
-            onLoad={handleImageLoad}
             onDragStart={(e) => e.preventDefault()} // Prevent image drag
             style={{ 
               userSelect: 'none',
@@ -120,13 +119,27 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
           } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}>
             <div className="text-center text-gray-500">
               <div className="text-4xl mb-2">🎨</div>
-              <p className="text-sm">Loading...</p>
+              <p className="text-sm">
+                {image.loadingState === 'waitingOnAPI' ? 'Generating...' : 
+                 image.loadingState === 'urlLoading' ? 'Loading...' : 
+                 'Loading...'}
+              </p>
             </div>
           </div>
         )}
         
+        {/* Image with loading detection */}
+        {image.src && image.loadingState === 'urlLoading' && (
+          <img
+            src={image.src}
+            onLoad={handleImageLoad}
+            style={{ display: 'none' }}
+            alt=""
+          />
+        )}
+        
         {/* Small corner loading indicator */}
-        {image.isGenerating && (
+        {(image.loadingState === 'waitingOnAPI' || image.loadingState === 'urlLoading') && (
           <div className="absolute top-2 left-2 z-30">
             <div className="bg-blue-500 bg-opacity-90 rounded-full p-1.5 shadow-lg">
               <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
