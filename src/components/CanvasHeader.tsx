@@ -16,6 +16,7 @@ interface CanvasHeaderProps {
   fileMenuStatus: FileMenuStatus;
   shareUrl: string | null;
   lastSavedDocumentId: string | null;
+  isLoadingDocument: boolean;
 }
 
 export default function CanvasHeader({
@@ -30,6 +31,7 @@ export default function CanvasHeader({
   fileMenuStatus,
   shareUrl,
   lastSavedDocumentId,
+  isLoadingDocument,
 }: CanvasHeaderProps) {
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -55,8 +57,14 @@ export default function CanvasHeader({
   return (
     <div className="absolute top-0 left-0 right-0 z-20 bg-white shadow-sm p-4">
       <div className="flex flex-col items-center gap-4">
-        <div className="text-center">
+        <div className="text-center flex items-center gap-3">
           <h1 className="text-2xl font-bold text-gray-800">AI Image Canvas</h1>
+          {isLoadingDocument && (
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+              <span className="text-sm text-gray-600">Loading...</span>
+            </div>
+          )}
         </div>
         
         {/* Live Prompt Input */}
