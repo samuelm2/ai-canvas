@@ -128,9 +128,16 @@ export default function ImageCanvas() {
     await generateImageForTile(selectedImageId, prompt);
   };
 
+  // Helper to update tile state
+  const updateTileState = useCallback((tileId: string, updates: Partial<CanvasImage>) => {
+    setImages(prev => prev.map(img => 
+      img.id === tileId ? { ...img, ...updates } : img
+    ));
+  }, []);
+
   // Generate image for a specific tile
   const generateImageForTile = async (tileId: string, prompt: string) => {
-    if (!prompt || prompt.trim() === '') {
+    if (!prompt?.trim()) {
       setError('Cannot generate image with empty prompt');
       return;
     }
@@ -143,59 +150,34 @@ export default function ImageCanvas() {
     activeRequestsRef.current.set(tileId, abortController);
     
     try {
-      // Always call generateImage - server handles demo mode automatically
       const result = await AIService.generateImage(prompt, abortController.signal);
       
-      // Remove from active requests if not already cancelled
+      // Clean up request tracking
       activeRequestsRef.current.delete(tileId);
       
       if (result.success && result.imageUrl) {
-        // Set state to urlLoading but don't update src yet
-        setImages(prev => prev.map(img => 
-          img.id === tileId 
-            ? { ...img, loadingState: 'urlLoading' }
-            : img
-        ));
+        updateTileState(tileId, { loadingState: 'urlLoading' });
         
-        // Preload the image
         try {
           await preloadImage(result.imageUrl);
-          
-          // Only update src after image is fully loaded
-          setImages(prev => prev.map(img => 
-            img.id === tileId 
-              ? { ...img, src: result.imageUrl!, loadingState: 'finished' }
-              : img
-          ));
-        } catch (error) {
-          console.error('Failed to preload image:', error);
+          updateTileState(tileId, { 
+            src: result.imageUrl, 
+            loadingState: 'finished' 
+          });
+        } catch {
           setError('Failed to load image');
-          setImages(prev => prev.map(img => 
-            img.id === tileId 
-              ? { ...img, loadingState: 'finished' }
-              : img
-          ));
+          updateTileState(tileId, { loadingState: 'finished' });
         }
       } else if (result.error !== 'Request cancelled') {
-        // Only show error if it wasn't cancelled
         setError(result.error || 'Failed to generate image');
-        setImages(prev => prev.map(img => 
-          img.id === tileId 
-            ? { ...img, loadingState: 'finished' }
-            : img
-        ));
+        updateTileState(tileId, { loadingState: 'finished' });
       }
     } catch (err: any) {
-      // Remove from active requests
       activeRequestsRef.current.delete(tileId);
       
       if (err.name !== 'AbortError') {
         setError('Network error occurred');
-        setImages(prev => prev.map(img => 
-          img.id === tileId 
-            ? { ...img, isGenerating: false }
-            : img
-        ));
+        updateTileState(tileId, { loadingState: 'finished' });
       }
     }
   };
