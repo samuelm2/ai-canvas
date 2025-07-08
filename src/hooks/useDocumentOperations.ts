@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { DocumentService } from '../services/documentService';
-import { CanvasImage } from '../types';
+import { CanvasImage, SaveState } from '../types';
 
 interface UseDocumentOperationsProps {
   images: CanvasImage[];
@@ -16,8 +15,7 @@ export function useDocumentOperations({
   setError,
   clearAll,
 }: UseDocumentOperationsProps) {
-  const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
   const [isLoading, setIsLoading] = useState(false);
   const [lastSavedDocumentId, setLastSavedDocumentId] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -29,7 +27,13 @@ export function useDocumentOperations({
       return null;
     }
 
-    setIsSaving(true);
+    // Prevent multiple simultaneous saves
+    if (saveState !== 'idle') {
+      return null;
+    }
+
+    // Set the appropriate loading state
+    setSaveState(forceNew ? 'savingNewCopy' : 'saving');
     setError(null);
 
     try {
@@ -50,7 +54,8 @@ export function useDocumentOperations({
         
         // Update URL parameter when saving a new copy
         if (forceNew || !lastSavedDocumentId) {
-          router.push(`?doc=${result.documentId}`);
+          const newUrl = `${window.location.pathname}?doc=${result.documentId}`;
+          window.history.replaceState(null, '', newUrl);
         }
         
         return {
@@ -66,9 +71,9 @@ export function useDocumentOperations({
       setError('Failed to save document');
       return null;
     } finally {
-      setIsSaving(false);
+      setSaveState('idle');
     }
-  }, [images, lastSavedDocumentId, setError, router]);
+  }, [images, lastSavedDocumentId, setError]);
 
   // Load a document by ID
   const loadDocument = useCallback(async (documentId: string) => {
@@ -89,7 +94,8 @@ export function useDocumentOperations({
         setLastSavedDocumentId(documentId);
         
         // Update URL parameter to reflect the loaded document
-        router.push(`?doc=${documentId}`);
+        const newUrl = `${window.location.pathname}?doc=${documentId}`;
+        window.history.replaceState(null, '', newUrl);
         
         return result.document;
       } else {
@@ -103,7 +109,7 @@ export function useDocumentOperations({
     } finally {
       setIsLoading(false);
     }
-  }, [setImages, setError, clearAll, router]);
+  }, [setImages, setError, clearAll]);
 
   // Copy share URL to clipboard
   const copyShareUrl = useCallback(async () => {
@@ -124,12 +130,12 @@ export function useDocumentOperations({
     setShareUrl(null);
     
     // Clear URL parameter when resetting document state
-    router.push(window.location.pathname);
-  }, [router]);
+    window.history.replaceState(null, '', window.location.pathname);
+  }, []);
 
   return {
     // State
-    isSaving,
+    saveState,
     isLoading,
     lastSavedDocumentId,
     shareUrl,

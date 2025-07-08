@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PromptInput from './PromptInput';
-import { CanvasImage } from '../types';
+import { CanvasImage, SaveState } from '../types';
 
 interface CanvasHeaderProps {
   currentPrompt: string;
@@ -11,7 +11,7 @@ interface CanvasHeaderProps {
   imagesCount: number;
   onSaveDocument: (title?: string, forceNew?: boolean) => Promise<{ documentId: string; shareUrl: string } | null>;
   onCopyShareUrl: () => Promise<boolean>;
-  isSaving: boolean;
+  saveState: SaveState;
   shareUrl: string | null;
   lastSavedDocumentId: string | null;
 }
@@ -25,7 +25,7 @@ export default function CanvasHeader({
   imagesCount,
   onSaveDocument,
   onCopyShareUrl,
-  isSaving,
+  saveState,
   shareUrl,
   lastSavedDocumentId,
 }: CanvasHeaderProps) {
@@ -35,13 +35,17 @@ export default function CanvasHeader({
   const handleSave = async () => {
     const result = await onSaveDocument(undefined, false);
     if (result) {
-      setShowShareModal(true);
+      // Only show modal for first save (when there was no existing document)
+      if (!lastSavedDocumentId) {
+        setShowShareModal(true);
+      }
     }
   };
 
   const handleSaveNewCopy = async () => {
     const result = await onSaveDocument(undefined, true);
     if (result) {
+      // Always show modal for new copies (new share URL)
       setShowShareModal(true);
     }
   };
@@ -80,27 +84,27 @@ export default function CanvasHeader({
         <div className="flex gap-2 flex-wrap justify-center">
           <button
             onClick={handleSave}
-            disabled={imagesCount === 0 || isSaving}
+            disabled={imagesCount === 0 || saveState !== 'idle'}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              imagesCount === 0 || isSaving
+              imagesCount === 0 || saveState !== 'idle'
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-blue-500 hover:bg-blue-600 text-white'
             }`}
           >
-            {isSaving ? '💾 Saving...' : '💾 Save'}
+            {saveState === 'saving' ? '💾 Saving...' : '💾 Save'}
           </button>
 
           {lastSavedDocumentId && (
             <button
               onClick={handleSaveNewCopy}
-              disabled={imagesCount === 0 || isSaving}
+              disabled={imagesCount === 0 || saveState !== 'idle'}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                imagesCount === 0 || isSaving
+                imagesCount === 0 || saveState !== 'idle'
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-purple-500 hover:bg-purple-600 text-white'
               }`}
             >
-              📄 Save New Copy
+              {saveState === 'savingNewCopy' ? '📄 Saving New Copy...' : '📄 Save New Copy'}
             </button>
           )}
           

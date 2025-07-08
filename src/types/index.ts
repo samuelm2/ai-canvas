@@ -49,4 +49,6 @@ export interface LoadDocumentResponse {
   success: boolean;
   document?: CanvasDocument;
   error?: string;
-} 
+}
+
+export type SaveState = 'idle' | 'saving' | 'savingNewCopy'; 

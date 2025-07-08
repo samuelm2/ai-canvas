@@ -40,7 +40,7 @@ export default function ImageCanvas() {
     saveDocument,
     loadDocument,
     copyShareUrl,
-    isSaving,
+    saveState,
     isLoadingDocument,
     shareUrl,
     lastSavedDocumentId,
@@ -76,13 +76,14 @@ export default function ImageCanvas() {
     clearCanvas();
   }, [debouncedPromptUpdate, clearCanvas]);
 
-  // Handle automatic document loading from URL
+  // Handle automatic document loading from URL (only on initial page load)
   useEffect(() => {
     const docId = searchParams.get('doc');
     if (docId) {
       loadDocument(docId);
     }
-  }, [searchParams, loadDocument]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Cleanup on unmount
   useEffect(() => {
@@ -113,7 +114,7 @@ export default function ImageCanvas() {
         imagesCount={images.length}
         onSaveDocument={saveDocument}
         onCopyShareUrl={copyShareUrl}
-        isSaving={isSaving}
+        saveState={saveState}
         shareUrl={shareUrl}
         lastSavedDocumentId={lastSavedDocumentId}
       />
