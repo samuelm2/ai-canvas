@@ -43,6 +43,7 @@ export default function ImageCanvas() {
     isSaving,
     isLoadingDocument,
     shareUrl,
+    lastSavedDocumentId,
     
     cleanup,
   } = useImageCanvas();
@@ -114,6 +115,7 @@ export default function ImageCanvas() {
         onCopyShareUrl={copyShareUrl}
         isSaving={isSaving}
         shareUrl={shareUrl}
+        lastSavedDocumentId={lastSavedDocumentId}
       />
 
       {/* Error Display */}

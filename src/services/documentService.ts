@@ -89,6 +89,57 @@ export class DocumentService {
     }));
   }
 
+  static async updateDocument(documentId: string, title: string | undefined, images: CanvasImage[]): Promise<SaveDocumentResponse> {
+    try {
+      // Serialize images, removing UI-specific properties
+      const serializedImages = images.map(img => ({
+        id: img.id,
+        src: img.src,
+        x: img.x,
+        y: img.y,
+        width: img.width,
+        height: img.height,
+        prompt: img.prompt,
+        zIndex: img.zIndex || 1,
+        // Exclude selected, loadingState as these are UI-only
+      }));
+
+      const requestData = {
+        title,
+        images: serializedImages,
+      };
+
+      const response = await axios.put(`/api/documents/${documentId}`, requestData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Generate the same share URL since document ID doesn't change
+      const shareUrl = this.generateShareUrl(documentId);
+
+      return {
+        success: true,
+        documentId,
+        shareUrl,
+      };
+    } catch (error: any) {
+      console.error('Error updating document:', error);
+      
+      let errorMessage = 'Failed to update document';
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
   // Utility function to generate a shareable URL
   static generateShareUrl(documentId: string, baseUrl?: string): string {
     const base = baseUrl || window.location.origin;

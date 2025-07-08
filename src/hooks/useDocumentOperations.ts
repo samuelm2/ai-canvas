@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { DocumentService } from '../services/documentService';
 import { CanvasImage } from '../types';
 
@@ -15,13 +16,14 @@ export function useDocumentOperations({
   setError,
   clearAll,
 }: UseDocumentOperationsProps) {
+  const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [lastSavedDocumentId, setLastSavedDocumentId] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
 
-  // Save current canvas as a document
-  const saveDocument = useCallback(async (title?: string) => {
+  // Save or update current canvas as a document
+  const saveDocument = useCallback(async (title?: string, forceNew: boolean = false) => {
     if (images.length === 0) {
       setError('Cannot save empty canvas');
       return null;
@@ -31,11 +33,26 @@ export function useDocumentOperations({
     setError(null);
 
     try {
-      const result = await DocumentService.saveDocument(title, images);
+      let result;
+      
+      if (lastSavedDocumentId && !forceNew) {
+        // Update existing document
+        result = await DocumentService.updateDocument(lastSavedDocumentId, title, images);
+      } else {
+        // Create new document (either first save or forced new copy)
+        result = await DocumentService.saveDocument(title, images);
+      }
       
       if (result.success && result.documentId && result.shareUrl) {
+        // Always update to track the current document (whether updated or new)
         setLastSavedDocumentId(result.documentId);
         setShareUrl(result.shareUrl);
+        
+        // Update URL parameter when saving a new copy
+        if (forceNew || !lastSavedDocumentId) {
+          router.push(`?doc=${result.documentId}`);
+        }
+        
         return {
           documentId: result.documentId,
           shareUrl: result.shareUrl,
@@ -51,7 +68,7 @@ export function useDocumentOperations({
     } finally {
       setIsSaving(false);
     }
-  }, [images, setError]);
+  }, [images, lastSavedDocumentId, setError, router]);
 
   // Load a document by ID
   const loadDocument = useCallback(async (documentId: string) => {
@@ -70,6 +87,10 @@ export function useDocumentOperations({
         setImages(deserializedImages);
         
         setLastSavedDocumentId(documentId);
+        
+        // Update URL parameter to reflect the loaded document
+        router.push(`?doc=${documentId}`);
+        
         return result.document;
       } else {
         setError(result.error || 'Failed to load document');
@@ -82,7 +103,7 @@ export function useDocumentOperations({
     } finally {
       setIsLoading(false);
     }
-  }, [setImages, setError, clearAll]);
+  }, [setImages, setError, clearAll, router]);
 
   // Copy share URL to clipboard
   const copyShareUrl = useCallback(async () => {
@@ -101,7 +122,10 @@ export function useDocumentOperations({
   const resetDocumentState = useCallback(() => {
     setLastSavedDocumentId(null);
     setShareUrl(null);
-  }, []);
+    
+    // Clear URL parameter when resetting document state
+    router.push(window.location.pathname);
+  }, [router]);
 
   return {
     // State

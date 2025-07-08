@@ -28,6 +28,14 @@ export function useImageCanvas() {
     ...imageGeneration,
   });
   
+  // Get document operations
+  const documentOps = useDocumentOperations({
+    images: canvasState.images,
+    setImages: canvasState.setImages,
+    setError: canvasState.setError,
+    clearAll: canvasState.clearAll,
+  });
+
   // Get canvas layout operations
   const canvasLayout = useCanvasLayout({
     images: canvasState.images,
@@ -35,14 +43,7 @@ export function useImageCanvas() {
     setIsOrganizing: canvasState.setIsOrganizing,
     clearAll: canvasState.clearAll,
     cleanup: imageGeneration.cleanup,
-  });
-
-  // Get document operations
-  const documentOps = useDocumentOperations({
-    images: canvasState.images,
-    setImages: canvasState.setImages,
-    setError: canvasState.setError,
-    clearAll: canvasState.clearAll,
+    resetDocumentState: documentOps.resetDocumentState,
   });
 
   return {

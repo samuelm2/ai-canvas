@@ -9,10 +9,11 @@ interface CanvasHeaderProps {
   onOrganizeGrid: () => void;
   onClearCanvas: () => void;
   imagesCount: number;
-  onSaveDocument: (title?: string) => Promise<{ documentId: string; shareUrl: string } | null>;
+  onSaveDocument: (title?: string, forceNew?: boolean) => Promise<{ documentId: string; shareUrl: string } | null>;
   onCopyShareUrl: () => Promise<boolean>;
   isSaving: boolean;
   shareUrl: string | null;
+  lastSavedDocumentId: string | null;
 }
 
 export default function CanvasHeader({
@@ -26,12 +27,20 @@ export default function CanvasHeader({
   onCopyShareUrl,
   isSaving,
   shareUrl,
+  lastSavedDocumentId,
 }: CanvasHeaderProps) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
   const handleSave = async () => {
-    const result = await onSaveDocument();
+    const result = await onSaveDocument(undefined, false);
+    if (result) {
+      setShowShareModal(true);
+    }
+  };
+
+  const handleSaveNewCopy = async () => {
+    const result = await onSaveDocument(undefined, true);
     if (result) {
       setShowShareModal(true);
     }
@@ -78,8 +87,22 @@ export default function CanvasHeader({
                 : 'bg-blue-500 hover:bg-blue-600 text-white'
             }`}
           >
-            {isSaving ? '💾 Saving...' : '💾 Save & Share'}
+            {isSaving ? '💾 Saving...' : '💾 Save'}
           </button>
+
+          {lastSavedDocumentId && (
+            <button
+              onClick={handleSaveNewCopy}
+              disabled={imagesCount === 0 || isSaving}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                imagesCount === 0 || isSaving
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-purple-500 hover:bg-purple-600 text-white'
+              }`}
+            >
+              📄 Save New Copy
+            </button>
+          )}
           
           {shareUrl && (
             <button
@@ -121,13 +144,13 @@ export default function CanvasHeader({
       
       {/* Share Modal */}
       {showShareModal && shareUrl && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold mb-4">Canvas Saved Successfully! 🎉</h3>
+        <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 10000 }}>
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-200">
+            <h3 className="text-lg font-bold mb-4 text-gray-800">Canvas Saved Successfully! 🎉</h3>
             <p className="text-gray-600 mb-4">
               Your canvas has been saved and can be shared with this link:
             </p>
-            <div className="bg-gray-100 p-3 rounded-lg mb-4 break-all text-sm">
+            <div className="bg-gray-100 p-3 rounded-lg mb-4 break-all text-sm text-gray-700 font-mono">
               {shareUrl}
             </div>
             <div className="flex gap-2 justify-end">
