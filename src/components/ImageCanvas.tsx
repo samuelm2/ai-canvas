@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+import { useSearchParams } from 'next/navigation';
 import { useImageCanvas } from '../hooks/useImageCanvas';
 import CanvasHeader from './CanvasHeader';
 import CanvasContent from './CanvasContent';
 
 export default function ImageCanvas() {
+  const searchParams = useSearchParams();
+  
   const {
     // State
     images,
@@ -32,6 +35,15 @@ export default function ImageCanvas() {
     organizeInGrid,
     clearCanvas,
     dismissError,
+    
+    // Document operations
+    saveDocument,
+    loadDocument,
+    copyShareUrl,
+    isSaving,
+    isLoadingDocument,
+    shareUrl,
+    
     cleanup,
   } = useImageCanvas();
 
@@ -63,6 +75,14 @@ export default function ImageCanvas() {
     clearCanvas();
   }, [debouncedPromptUpdate, clearCanvas]);
 
+  // Handle automatic document loading from URL
+  useEffect(() => {
+    const docId = searchParams.get('doc');
+    if (docId) {
+      loadDocument(docId);
+    }
+  }, [searchParams, loadDocument]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -72,6 +92,16 @@ export default function ImageCanvas() {
 
   return (
     <div className="w-full h-screen bg-gray-50 relative overflow-hidden">
+      
+      {/* Document Loading Overlay */}
+      {isLoadingDocument && (
+        <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-40">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-lg text-gray-700">Loading canvas...</p>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <CanvasHeader 
         currentPrompt={currentPrompt}
@@ -80,6 +110,10 @@ export default function ImageCanvas() {
         onOrganizeGrid={organizeInGrid}
         onClearCanvas={handleClearCanvas}
         imagesCount={images.length}
+        onSaveDocument={saveDocument}
+        onCopyShareUrl={copyShareUrl}
+        isSaving={isSaving}
+        shareUrl={shareUrl}
       />
 
       {/* Error Display */}

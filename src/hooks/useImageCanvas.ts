@@ -2,6 +2,7 @@ import { useCanvasState } from './useCanvasState';
 import { useImageGeneration } from './useImageGeneration';
 import { useImageOperations } from './useImageOperations';
 import { useCanvasLayout } from './useCanvasLayout';
+import { useDocumentOperations } from './useDocumentOperations';
 
 export function useImageCanvas() {
   // Get base state management
@@ -36,6 +37,14 @@ export function useImageCanvas() {
     cleanup: imageGeneration.cleanup,
   });
 
+  // Get document operations
+  const documentOps = useDocumentOperations({
+    images: canvasState.images,
+    setImages: canvasState.setImages,
+    setError: canvasState.setError,
+    clearAll: canvasState.clearAll,
+  });
+
   return {
     // State
     images: canvasState.images,
@@ -62,6 +71,16 @@ export function useImageCanvas() {
     organizeInGrid: canvasLayout.organizeInGrid,
     clearCanvas: canvasLayout.clearCanvas,
     dismissError: canvasState.dismissError,
+    
+    // Document operations
+    saveDocument: documentOps.saveDocument,
+    loadDocument: documentOps.loadDocument,
+    copyShareUrl: documentOps.copyShareUrl,
+    resetDocumentState: documentOps.resetDocumentState,
+    isSaving: documentOps.isSaving,
+    isLoadingDocument: documentOps.isLoading,
+    lastSavedDocumentId: documentOps.lastSavedDocumentId,
+    shareUrl: documentOps.shareUrl,
     
     // Cleanup
     cleanup: imageGeneration.cleanup,

@@ -10,6 +10,7 @@ export interface CanvasImage {
   prompt?: string;
   selected?: boolean;
   loadingState?: ImageLoadingState;
+  zIndex?: number;
 }
 
 export interface GridConfig {
@@ -21,5 +22,31 @@ export interface GridConfig {
 export interface AIImageResponse {
   success: boolean;
   imageUrl?: string;
+  error?: string;
+}
+
+export interface CanvasDocument {
+  id: string;
+  title?: string;
+  images: CanvasImage[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SaveDocumentRequest {
+  title?: string;
+  images: CanvasImage[];
+}
+
+export interface SaveDocumentResponse {
+  success: boolean;
+  documentId?: string;
+  shareUrl?: string;
+  error?: string;
+}
+
+export interface LoadDocumentResponse {
+  success: boolean;
+  document?: CanvasDocument;
   error?: string;
 } 

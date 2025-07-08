@@ -42,6 +42,12 @@ export function useImageOperations(props: UseImageOperationsProps) {
 
   // Generate unique ID for new images
   const generateId = () => `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Get next z-index value
+  const getNextZIndex = () => {
+    const maxZ = Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0));
+    return maxZ + 1;
+  };
 
   // Handle image dragging
   const handleImageDrag = useCallback((id: string, x: number, y: number) => {
@@ -52,11 +58,14 @@ export function useImageOperations(props: UseImageOperationsProps) {
   const handleImageSelect = useCallback((id: string) => {
     selectImage(id);
     
+    // Bring selected image to front
+    updateImage(id, { zIndex: getNextZIndex() });
+    
     const selectedImg = imagesRef.current.find(img => img.id === id);
     if (selectedImg?.prompt) {
       setCurrentPrompt(selectedImg.prompt);
     }
-  }, [selectImage, setCurrentPrompt]);
+  }, [selectImage, setCurrentPrompt, updateImage]);
 
   // Handle canvas click (deselection)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
@@ -84,6 +93,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
       y: imageToDuplicate.y + 30,
       selected: false,
       loadingState: 'finished',
+      zIndex: getNextZIndex(),
     };
     
     addImage(newImage);
@@ -126,6 +136,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
         prompt: `${imageToExpand.prompt} (generating variation...)`,
         selected: false,
         loadingState: 'waitingOnAPI',
+        zIndex: getNextZIndex(),
       };
     });
     
@@ -167,6 +178,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
       prompt,
       selected: true,
       loadingState: 'waitingOnAPI',
+      zIndex: getNextZIndex(),
     };
     
     addImage(newImage);

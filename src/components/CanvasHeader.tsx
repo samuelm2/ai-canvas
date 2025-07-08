@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PromptInput from './PromptInput';
 import { CanvasImage } from '../types';
 
@@ -9,6 +9,10 @@ interface CanvasHeaderProps {
   onOrganizeGrid: () => void;
   onClearCanvas: () => void;
   imagesCount: number;
+  onSaveDocument: (title?: string) => Promise<{ documentId: string; shareUrl: string } | null>;
+  onCopyShareUrl: () => Promise<boolean>;
+  isSaving: boolean;
+  shareUrl: string | null;
 }
 
 export default function CanvasHeader({
@@ -18,7 +22,28 @@ export default function CanvasHeader({
   onOrganizeGrid,
   onClearCanvas,
   imagesCount,
+  onSaveDocument,
+  onCopyShareUrl,
+  isSaving,
+  shareUrl,
 }: CanvasHeaderProps) {
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleSave = async () => {
+    const result = await onSaveDocument();
+    if (result) {
+      setShowShareModal(true);
+    }
+  };
+
+  const handleCopyUrl = async () => {
+    const success = await onCopyShareUrl();
+    if (success) {
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
   return (
     <div className="absolute top-0 left-0 right-0 z-20 bg-white shadow-sm p-4">
       <div className="flex flex-col items-center gap-4">
@@ -43,7 +68,32 @@ export default function CanvasHeader({
         </div>
         
         {/* Controls */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-center">
+          <button
+            onClick={handleSave}
+            disabled={imagesCount === 0 || isSaving}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              imagesCount === 0 || isSaving
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}
+          >
+            {isSaving ? '💾 Saving...' : '💾 Save & Share'}
+          </button>
+          
+          {shareUrl && (
+            <button
+              onClick={handleCopyUrl}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                copySuccess
+                  ? 'bg-green-500 text-white'
+                  : 'bg-purple-500 hover:bg-purple-600 text-white'
+              }`}
+            >
+              {copySuccess ? '✅ Copied!' : '🔗 Copy Link'}
+            </button>
+          )}
+          
           <button
             onClick={onOrganizeGrid}
             disabled={imagesCount === 0}
@@ -68,6 +118,39 @@ export default function CanvasHeader({
           </button>
         </div>
       </div>
+      
+      {/* Share Modal */}
+      {showShareModal && shareUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold mb-4">Canvas Saved Successfully! 🎉</h3>
+            <p className="text-gray-600 mb-4">
+              Your canvas has been saved and can be shared with this link:
+            </p>
+            <div className="bg-gray-100 p-3 rounded-lg mb-4 break-all text-sm">
+              {shareUrl}
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={handleCopyUrl}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  copySuccess
+                    ? 'bg-green-500 text-white'
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                }`}
+              >
+                {copySuccess ? '✅ Copied!' : '📋 Copy Link'}
+              </button>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-2 rounded-lg font-medium bg-gray-500 hover:bg-gray-600 text-white"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

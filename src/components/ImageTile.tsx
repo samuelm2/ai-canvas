@@ -69,10 +69,11 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
     >
       <div 
         ref={nodeRef}
-        className={`absolute group ${isDragging ? 'z-50' : 'z-10'}`}
+        className="absolute group"
         style={{ 
           width: image.width, 
           height: image.height,
+          zIndex: isDragging ? 9999 : (image.zIndex || 1),
           // Only add transition during grid organization, not during normal dragging
           transition: isOrganizing ? 'transform 0.5s ease-out' : 'none',
           // Prevent text/image selection
