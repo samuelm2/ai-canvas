@@ -51,4 +51,4 @@ export interface LoadDocumentResponse {
   error?: string;
 }
 
-export type SaveState = 'idle' | 'saving' | 'savingNewCopy'; 
+export type SaveState = 'idle' | 'saving' | 'savingNewCopy' | 'saved'; 

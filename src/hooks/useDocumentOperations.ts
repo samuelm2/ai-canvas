@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { DocumentService } from '../services/documentService';
 import { CanvasImage, SaveState } from '../types';
 
@@ -19,6 +19,7 @@ export function useDocumentOperations({
   const [isLoading, setIsLoading] = useState(false);
   const [lastSavedDocumentId, setLastSavedDocumentId] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Save or update current canvas as a document
   const saveDocument = useCallback(async (title?: string, forceNew: boolean = false) => {
@@ -28,8 +29,14 @@ export function useDocumentOperations({
     }
 
     // Prevent multiple simultaneous saves
-    if (saveState !== 'idle') {
+    if (saveState !== 'idle' && saveState !== 'saved') {
       return null;
+    }
+
+    // Clear any existing "saved" timeout
+    if (savedTimeoutRef.current) {
+      clearTimeout(savedTimeoutRef.current);
+      savedTimeoutRef.current = null;
     }
 
     // Set the appropriate loading state
@@ -58,20 +65,27 @@ export function useDocumentOperations({
           window.history.replaceState(null, '', newUrl);
         }
         
+        // Set saved state and schedule transition back to idle
+        setSaveState('saved');
+        savedTimeoutRef.current = setTimeout(() => {
+          setSaveState('idle');
+          savedTimeoutRef.current = null;
+        }, 2000);
+        
         return {
           documentId: result.documentId,
           shareUrl: result.shareUrl,
         };
       } else {
         setError(result.error || 'Failed to save document');
+        setSaveState('idle');
         return null;
       }
     } catch (error) {
       console.error('Error saving document:', error);
       setError('Failed to save document');
-      return null;
-    } finally {
       setSaveState('idle');
+      return null;
     }
   }, [images, lastSavedDocumentId, setError]);
 
@@ -92,6 +106,10 @@ export function useDocumentOperations({
         setImages(deserializedImages);
         
         setLastSavedDocumentId(documentId);
+        
+        // Set share URL for existing document
+        const shareUrl = DocumentService.generateShareUrl(documentId);
+        setShareUrl(shareUrl);
         
         // Update URL parameter to reflect the loaded document
         const newUrl = `${window.location.pathname}?doc=${documentId}`;
@@ -128,9 +146,25 @@ export function useDocumentOperations({
   const resetDocumentState = useCallback(() => {
     setLastSavedDocumentId(null);
     setShareUrl(null);
+    setSaveState('idle');
+    
+    // Clear any existing "saved" timeout
+    if (savedTimeoutRef.current) {
+      clearTimeout(savedTimeoutRef.current);
+      savedTimeoutRef.current = null;
+    }
     
     // Clear URL parameter when resetting document state
     window.history.replaceState(null, '', window.location.pathname);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (savedTimeoutRef.current) {
+        clearTimeout(savedTimeoutRef.current);
+      }
+    };
   }, []);
 
   return {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PromptInput from './PromptInput';
+import ShareModal from './ShareModal';
 import { CanvasImage, SaveState } from '../types';
 
 interface CanvasHeaderProps {
@@ -30,7 +31,6 @@ export default function CanvasHeader({
   lastSavedDocumentId,
 }: CanvasHeaderProps) {
   const [showShareModal, setShowShareModal] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
 
   const handleSave = async () => {
     const result = await onSaveDocument(undefined, false);
@@ -50,13 +50,7 @@ export default function CanvasHeader({
     }
   };
 
-  const handleCopyUrl = async () => {
-    const success = await onCopyShareUrl();
-    if (success) {
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    }
-  };
+
   return (
     <div className="absolute top-0 left-0 right-0 z-20 bg-white shadow-sm p-4">
       <div className="flex flex-col items-center gap-4">
@@ -84,22 +78,24 @@ export default function CanvasHeader({
         <div className="flex gap-2 flex-wrap justify-center">
           <button
             onClick={handleSave}
-            disabled={imagesCount === 0 || saveState !== 'idle'}
+            disabled={imagesCount === 0 || (saveState !== 'idle' && saveState !== 'saved')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              imagesCount === 0 || saveState !== 'idle'
+              imagesCount === 0 || (saveState !== 'idle' && saveState !== 'saved')
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : saveState === 'saved'
+                ? 'bg-green-500 text-white'
                 : 'bg-blue-500 hover:bg-blue-600 text-white'
             }`}
           >
-            {saveState === 'saving' ? '💾 Saving...' : '💾 Save'}
+            {saveState === 'saving' ? '💾 Saving...' : saveState === 'saved' ? '✅ Saved!' : '💾 Save'}
           </button>
 
           {lastSavedDocumentId && (
             <button
               onClick={handleSaveNewCopy}
-              disabled={imagesCount === 0 || saveState !== 'idle'}
+              disabled={imagesCount === 0 || saveState === 'savingNewCopy'}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                imagesCount === 0 || saveState !== 'idle'
+                imagesCount === 0 || saveState === 'savingNewCopy'
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-purple-500 hover:bg-purple-600 text-white'
               }`}
@@ -110,14 +106,10 @@ export default function CanvasHeader({
           
           {shareUrl && (
             <button
-              onClick={handleCopyUrl}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                copySuccess
-                  ? 'bg-green-500 text-white'
-                  : 'bg-purple-500 hover:bg-purple-600 text-white'
-              }`}
+              onClick={onCopyShareUrl}
+              className="px-4 py-2 rounded-lg font-medium transition-colors bg-purple-500 hover:bg-purple-600 text-white"
             >
-              {copySuccess ? '✅ Copied!' : '🔗 Copy Link'}
+              🔗 Copy Link
             </button>
           )}
           
@@ -147,36 +139,13 @@ export default function CanvasHeader({
       </div>
       
       {/* Share Modal */}
-      {showShareModal && shareUrl && (
-        <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 10000 }}>
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-200">
-            <h3 className="text-lg font-bold mb-4 text-gray-800">Canvas Saved Successfully! 🎉</h3>
-            <p className="text-gray-600 mb-4">
-              Your canvas has been saved and can be shared with this link:
-            </p>
-            <div className="bg-gray-100 p-3 rounded-lg mb-4 break-all text-sm text-gray-700 font-mono">
-              {shareUrl}
-            </div>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={handleCopyUrl}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  copySuccess
-                    ? 'bg-green-500 text-white'
-                    : 'bg-blue-500 hover:bg-blue-600 text-white'
-                }`}
-              >
-                {copySuccess ? '✅ Copied!' : '📋 Copy Link'}
-              </button>
-              <button
-                onClick={() => setShowShareModal(false)}
-                className="px-4 py-2 rounded-lg font-medium bg-gray-500 hover:bg-gray-600 text-white"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+      {shareUrl && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          shareUrl={shareUrl}
+          onCopyUrl={onCopyShareUrl}
+        />
       )}
     </div>
   );
