@@ -40,7 +40,7 @@ export default function ImageCanvas() {
     saveDocument,
     loadDocument,
     copyShareUrl,
-    saveState,
+    fileMenuStatus,
     isLoadingDocument,
     shareUrl,
     lastSavedDocumentId,
@@ -114,7 +114,7 @@ export default function ImageCanvas() {
         imagesCount={images.length}
         onSaveDocument={saveDocument}
         onCopyShareUrl={copyShareUrl}
-        saveState={saveState}
+        fileMenuStatus={fileMenuStatus}
         shareUrl={shareUrl}
         lastSavedDocumentId={lastSavedDocumentId}
       />

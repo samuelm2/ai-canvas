@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import PromptInput from './PromptInput';
 import ShareModal from './ShareModal';
-import { CanvasImage, SaveState } from '../types';
+import FileMenu from './FileMenu';
+import { CanvasImage, FileMenuStatus } from '../types';
 
 interface CanvasHeaderProps {
   currentPrompt: string;
@@ -12,7 +13,7 @@ interface CanvasHeaderProps {
   imagesCount: number;
   onSaveDocument: (title?: string, forceNew?: boolean) => Promise<{ documentId: string; shareUrl: string } | null>;
   onCopyShareUrl: () => Promise<boolean>;
-  saveState: SaveState;
+  fileMenuStatus: FileMenuStatus;
   shareUrl: string | null;
   lastSavedDocumentId: string | null;
 }
@@ -26,7 +27,7 @@ export default function CanvasHeader({
   imagesCount,
   onSaveDocument,
   onCopyShareUrl,
-  saveState,
+  fileMenuStatus,
   shareUrl,
   lastSavedDocumentId,
 }: CanvasHeaderProps) {
@@ -76,42 +77,15 @@ export default function CanvasHeader({
         
         {/* Controls */}
         <div className="flex gap-2 flex-wrap justify-center">
-          <button
-            onClick={handleSave}
-            disabled={imagesCount === 0 || (saveState !== 'idle' && saveState !== 'saved')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              imagesCount === 0 || (saveState !== 'idle' && saveState !== 'saved')
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : saveState === 'saved'
-                ? 'bg-green-500 text-white'
-                : 'bg-blue-500 hover:bg-blue-600 text-white'
-            }`}
-          >
-            {saveState === 'saving' ? '💾 Saving...' : saveState === 'saved' ? '✅ Saved!' : '💾 Save'}
-          </button>
-
-          {lastSavedDocumentId && (
-            <button
-              onClick={handleSaveNewCopy}
-              disabled={imagesCount === 0 || saveState === 'savingNewCopy'}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                imagesCount === 0 || saveState === 'savingNewCopy'
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-purple-500 hover:bg-purple-600 text-white'
-              }`}
-            >
-              {saveState === 'savingNewCopy' ? '📄 Saving New Copy...' : '📄 Save New Copy'}
-            </button>
-          )}
-          
-          {shareUrl && (
-            <button
-              onClick={onCopyShareUrl}
-              className="px-4 py-2 rounded-lg font-medium transition-colors bg-purple-500 hover:bg-purple-600 text-white"
-            >
-              🔗 Copy Link
-            </button>
-          )}
+          <FileMenu
+            imagesCount={imagesCount}
+            fileMenuStatus={fileMenuStatus}
+            lastSavedDocumentId={lastSavedDocumentId}
+            shareUrl={shareUrl}
+            onSave={handleSave}
+            onSaveNewCopy={handleSaveNewCopy}
+            onCopyShareUrl={onCopyShareUrl}
+          />
           
           <button
             onClick={onOrganizeGrid}
@@ -119,7 +93,7 @@ export default function CanvasHeader({
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               imagesCount === 0
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-green-500 hover:bg-green-600 text-white'
+                : 'bg-purple-500 hover:bg-purple-600 text-white'
             }`}
           >
             📐 Organize Grid

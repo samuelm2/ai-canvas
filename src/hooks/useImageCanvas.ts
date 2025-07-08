@@ -78,7 +78,7 @@ export function useImageCanvas() {
     loadDocument: documentOps.loadDocument,
     copyShareUrl: documentOps.copyShareUrl,
     resetDocumentState: documentOps.resetDocumentState,
-    saveState: documentOps.saveState,
+    fileMenuStatus: documentOps.fileMenuStatus,
     isLoadingDocument: documentOps.isLoading,
     lastSavedDocumentId: documentOps.lastSavedDocumentId,
     shareUrl: documentOps.shareUrl,

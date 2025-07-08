@@ -1,6 +1,6 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { DocumentService } from '../services/documentService';
-import { CanvasImage, SaveState } from '../types';
+import { CanvasImage, FileMenuStatus } from '../types';
 
 interface UseDocumentOperationsProps {
   images: CanvasImage[];
@@ -15,7 +15,7 @@ export function useDocumentOperations({
   setError,
   clearAll,
 }: UseDocumentOperationsProps) {
-  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [fileMenuStatus, setFileMenuStatus] = useState<FileMenuStatus>('idle');
   const [isLoading, setIsLoading] = useState(false);
   const [lastSavedDocumentId, setLastSavedDocumentId] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export function useDocumentOperations({
     }
 
     // Prevent multiple simultaneous saves
-    if (saveState !== 'idle' && saveState !== 'saved') {
+    if (fileMenuStatus !== 'idle' && fileMenuStatus !== 'saved') {
       return null;
     }
 
@@ -40,7 +40,7 @@ export function useDocumentOperations({
     }
 
     // Set the appropriate loading state
-    setSaveState(forceNew ? 'savingNewCopy' : 'saving');
+    setFileMenuStatus(forceNew ? 'savingNewCopy' : 'saving');
     setError(null);
 
     try {
@@ -66,9 +66,9 @@ export function useDocumentOperations({
         }
         
         // Set saved state and schedule transition back to idle
-        setSaveState('saved');
+        setFileMenuStatus('saved');
         savedTimeoutRef.current = setTimeout(() => {
-          setSaveState('idle');
+          setFileMenuStatus('idle');
           savedTimeoutRef.current = null;
         }, 2000);
         
@@ -78,13 +78,13 @@ export function useDocumentOperations({
         };
       } else {
         setError(result.error || 'Failed to save document');
-        setSaveState('idle');
+        setFileMenuStatus('idle');
         return null;
       }
     } catch (error) {
       console.error('Error saving document:', error);
       setError('Failed to save document');
-      setSaveState('idle');
+      setFileMenuStatus('idle');
       return null;
     }
   }, [images, lastSavedDocumentId, setError]);
@@ -135,6 +135,20 @@ export function useDocumentOperations({
 
     try {
       await navigator.clipboard.writeText(shareUrl);
+      
+      // Clear any existing timeout
+      if (savedTimeoutRef.current) {
+        clearTimeout(savedTimeoutRef.current);
+        savedTimeoutRef.current = null;
+      }
+      
+      // Set copied state and schedule transition back to idle
+      setFileMenuStatus('copied');
+      savedTimeoutRef.current = setTimeout(() => {
+        setFileMenuStatus('idle');
+        savedTimeoutRef.current = null;
+      }, 2000);
+      
       return true;
     } catch (error) {
       console.error('Failed to copy URL to clipboard:', error);
@@ -146,7 +160,7 @@ export function useDocumentOperations({
   const resetDocumentState = useCallback(() => {
     setLastSavedDocumentId(null);
     setShareUrl(null);
-    setSaveState('idle');
+    setFileMenuStatus('idle');
     
     // Clear any existing "saved" timeout
     if (savedTimeoutRef.current) {
@@ -169,7 +183,7 @@ export function useDocumentOperations({
 
   return {
     // State
-    saveState,
+    fileMenuStatus,
     isLoading,
     lastSavedDocumentId,
     shareUrl,
