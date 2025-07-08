@@ -79,15 +79,14 @@ export class DocumentService {
     }
   }
 
-  // Utility function to deserialize loaded images back to CanvasImage format
+    // Utility function to deserialize loaded images back to CanvasImage format
   static deserializeImages(serializedImages: any[]): CanvasImage[] {
     return serializedImages.map(img => ({
       ...img,
       src: '', // Initially no src so it shows loading placeholder
       selected: false, // Reset UI state
-              displayState: 'loading' as const, // Set to loading state initially
+      displayState: 'loading' as const, // Set to loading state initially
       zIndex: img.zIndex || 1, // Ensure zIndex exists
-      originalSrc: img.src, // Store original src for preloading
     }));
   }
 

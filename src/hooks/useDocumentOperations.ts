@@ -105,24 +105,24 @@ export function useDocumentOperations({
         // Clear current canvas first
         clearAll();
         
-        // Deserialize and load images
+                // Deserialize and load images
         const deserializedImages = DocumentService.deserializeImages(result.document.images);
         setImages(deserializedImages);
         
         // Preload all images and update their loading states
-        deserializedImages.forEach(async (image) => {
-          const originalSrc = (image as any).originalSrc;
-          if (originalSrc) {
+        result.document.images.forEach(async (originalImage: any, index: number) => {
+          const deserializedImage = deserializedImages[index];
+          if (originalImage.src) {
             try {
-              await preloadImage(originalSrc);
-              updateImage(image.id, { 
-                src: originalSrc, 
+              await preloadImage(originalImage.src);
+              updateImage(deserializedImage.id, { 
+                src: originalImage.src, 
                 displayState: 'ready' 
               });
-                          } catch (error) {
-                console.error('Failed to preload image:', error);
-                updateImage(image.id, { displayState: 'ready' });
-              }
+            } catch (error) {
+              console.error('Failed to preload image:', error);
+              updateImage(deserializedImage.id, { displayState: 'ready' });
+            }
           }
         });
         
