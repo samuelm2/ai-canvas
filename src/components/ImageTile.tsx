@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import Draggable from 'react-draggable';
 import { CanvasImage } from '../types';
 
-interface DraggableImageProps {
+interface ImageTileProps {
   image: CanvasImage;
   onDrag: (id: string, x: number, y: number) => void;
   onDelete: (id: string) => void;
@@ -14,7 +14,7 @@ interface DraggableImageProps {
   isOrganizing: boolean;
 }
 
-export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, isOrganizing }: DraggableImageProps) {
+export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, isOrganizing }: ImageTileProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const nodeRef = useRef(null);
@@ -57,8 +57,6 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
     e.stopPropagation();
     onSelect(image.id);
   };
-
-
 
   return (
     <Draggable
@@ -140,8 +138,6 @@ export default function DraggableImage({ image, onDrag, onDelete, onSelect, onDu
             </div>
           </div>
         )}
-        
-
         
         {/* Small corner loading indicator */}
         {(image.loadingState === 'waitingOnAPI' || image.loadingState === 'urlLoading') && (
