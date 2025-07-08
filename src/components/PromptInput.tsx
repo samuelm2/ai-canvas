@@ -28,6 +28,7 @@ export default function PromptInput({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    console.log('PromptInput handleChange called with:', newValue);
     
     // Update internal state if not controlled
     if (controlledValue === undefined) {
@@ -36,6 +37,7 @@ export default function PromptInput({
     
     // Call onChange callback if provided
     if (onChange) {
+      console.log('Calling onChange with:', newValue);
       onChange(newValue);
     }
   };
