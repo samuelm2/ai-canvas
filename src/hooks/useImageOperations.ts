@@ -36,6 +36,10 @@ export function useImageOperations(props: UseImageOperationsProps) {
     cancelActiveRequest,
   } = props;
 
+  // Keep a ref to current images to avoid re-renders when accessing them
+  const imagesRef = useRef<CanvasImage[]>(images);
+  imagesRef.current = images;
+
   // Generate unique ID for new images
   const generateId = () => `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -48,11 +52,11 @@ export function useImageOperations(props: UseImageOperationsProps) {
   const handleImageSelect = useCallback((id: string) => {
     selectImage(id);
     
-    const selectedImg = images.find(img => img.id === id);
+    const selectedImg = imagesRef.current.find(img => img.id === id);
     if (selectedImg?.prompt) {
       setCurrentPrompt(selectedImg.prompt);
     }
-  }, [images, selectImage, setCurrentPrompt]);
+  }, [selectImage, setCurrentPrompt]);
 
   // Handle canvas click (deselection)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
@@ -70,7 +74,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
 
   // Handle image duplication
   const handleImageDuplicate = useCallback((id: string) => {
-    const imageToDuplicate = images.find(img => img.id === id);
+    const imageToDuplicate = imagesRef.current.find(img => img.id === id);
     if (!imageToDuplicate) return;
     
     const newImage: CanvasImage = {
@@ -83,11 +87,11 @@ export function useImageOperations(props: UseImageOperationsProps) {
     };
     
     addImage(newImage);
-  }, [images, addImage]);
+  }, [addImage]);
 
   // Handle image expansion into 4 variations
   const handleImageExpand = useCallback(async (id: string) => {
-    const imageToExpand = images.find(img => img.id === id);
+    const imageToExpand = imagesRef.current.find(img => img.id === id);
     if (!imageToExpand?.prompt) return;
     
     const crossSpacing = STANDARD_IMAGE_SIZE + GRID_GAP * 2;
@@ -125,14 +129,14 @@ export function useImageOperations(props: UseImageOperationsProps) {
       };
     });
     
-    setImages([...images, ...placeholderImages]);
+    setImages([...imagesRef.current, ...placeholderImages]);
     
     try {
       const variationsResult = await generatePromptVariations(imageToExpand.prompt);
       
       if (!variationsResult.success || !variationsResult.variations) {
         setError('Failed to generate prompt variations');
-        setImages(images.filter(img => !placeholderImages.some(ph => ph.id === img.id)));
+        setImages(imagesRef.current.filter(img => !placeholderImages.some(ph => ph.id === img.id)));
         return;
       }
       
@@ -145,9 +149,9 @@ export function useImageOperations(props: UseImageOperationsProps) {
     } catch (error) {
       console.error('Error expanding image:', error);
       setError('Failed to expand image');
-      setImages(images.filter(img => !placeholderImages.some(ph => ph.id === img.id)));
+      setImages(imagesRef.current.filter(img => !placeholderImages.some(ph => ph.id === img.id)));
     }
-  }, [images, setImages, setError, updateImage, generateImageForTile, generatePromptVariations]);
+  }, [setImages, setError, updateImage, generateImageForTile, generatePromptVariations]);
 
   // Create a new tile
   const createNewTile = useCallback(async (prompt: string) => {
