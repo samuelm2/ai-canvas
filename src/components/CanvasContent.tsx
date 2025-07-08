@@ -1,5 +1,5 @@
 import React from 'react';
-import DraggableImage from './DraggableImage';
+import ImageTile from './ImageTile';
 import { CanvasImage } from '../types';
 
 interface CanvasContentProps {
@@ -49,9 +49,9 @@ export default function CanvasContent({
           </div>
         )}
 
-        {/* Draggable Images */}
+        {/* Image Tiles */}
         {images.map((image) => (
-          <DraggableImage
+          <ImageTile
             key={image.id}
             image={image}
             onDrag={onImageDrag}
