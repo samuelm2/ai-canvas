@@ -1,4 +1,4 @@
-export type ImageLoadingState = 'waitingOnAPI' | 'urlLoading' | 'finished';
+export type ImageDisplayState = 'loading' | 'updating' | 'ready';
 
 export interface CanvasImage {
   id: string;
@@ -9,7 +9,8 @@ export interface CanvasImage {
   height: number;
   prompt?: string;
   selected?: boolean;
-  loadingState?: ImageLoadingState;
+  displayState?: ImageDisplayState;
+  zIndex?: number;
 }
 
 export interface GridConfig {
@@ -22,4 +23,32 @@ export interface AIImageResponse {
   success: boolean;
   imageUrl?: string;
   error?: string;
-} 
+}
+
+export interface CanvasDocument {
+  id: string;
+  title?: string;
+  images: CanvasImage[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SaveDocumentRequest {
+  title?: string;
+  images: CanvasImage[];
+}
+
+export interface SaveDocumentResponse {
+  success: boolean;
+  documentId?: string;
+  shareUrl?: string;
+  error?: string;
+}
+
+export interface LoadDocumentResponse {
+  success: boolean;
+  document?: CanvasDocument;
+  error?: string;
+}
+
+export type FileMenuStatus = 'idle' | 'saving' | 'savingNewCopy' | 'saved' | 'copied'; 

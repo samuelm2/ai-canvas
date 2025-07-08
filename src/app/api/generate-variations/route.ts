@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { createSafeErrorResponse } from '../../../lib/errors';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
@@ -100,11 +101,7 @@ export async function POST(request: NextRequest) {
       variations,
     });
   } catch (error: any) {
-    console.error('Error generating prompt variations:', error);
-    
-    // Return generic error since we can't guarantee prompt is in scope
-    return NextResponse.json({ 
-      error: 'Failed to generate variations' 
-    }, { status: 500 });
+    const safeError = createSafeErrorResponse(error, 'Failed to generate variations', 'POST /api/generate-variations');
+    return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }
 } 

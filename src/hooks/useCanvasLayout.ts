@@ -14,6 +14,7 @@ interface UseCanvasLayoutProps {
   setIsOrganizing: (isOrganizing: boolean) => void;
   clearAll: () => void;
   cleanup: () => void;
+  resetDocumentState: () => void;
 }
 
 export function useCanvasLayout({ 
@@ -21,7 +22,8 @@ export function useCanvasLayout({
   setImages, 
   setIsOrganizing, 
   clearAll, 
-  cleanup 
+  cleanup,
+  resetDocumentState 
 }: UseCanvasLayoutProps) {
   
   // Organize images in a grid
@@ -52,7 +54,8 @@ export function useCanvasLayout({
   const clearCanvas = useCallback(() => {
     cleanup();
     clearAll();
-  }, [cleanup, clearAll]);
+    resetDocumentState();
+  }, [cleanup, clearAll, resetDocumentState]);
 
   return {
     organizeInGrid,

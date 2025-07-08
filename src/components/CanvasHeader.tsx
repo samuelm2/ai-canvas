@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PromptInput from './PromptInput';
-import { CanvasImage } from '../types';
+import ShareModal from './ShareModal';
+import FileMenu from './FileMenu';
+import { CanvasImage, FileMenuStatus } from '../types';
 
 interface CanvasHeaderProps {
   currentPrompt: string;
@@ -9,6 +11,12 @@ interface CanvasHeaderProps {
   onOrganizeGrid: () => void;
   onClearCanvas: () => void;
   imagesCount: number;
+  onSaveDocument: (title?: string, forceNew?: boolean) => Promise<{ documentId: string; shareUrl: string } | null>;
+  onCopyShareUrl: () => Promise<boolean>;
+  fileMenuStatus: FileMenuStatus;
+  shareUrl: string | null;
+  lastSavedDocumentId: string | null;
+  isLoadingDocument: boolean;
 }
 
 export default function CanvasHeader({
@@ -18,12 +26,45 @@ export default function CanvasHeader({
   onOrganizeGrid,
   onClearCanvas,
   imagesCount,
+  onSaveDocument,
+  onCopyShareUrl,
+  fileMenuStatus,
+  shareUrl,
+  lastSavedDocumentId,
+  isLoadingDocument,
 }: CanvasHeaderProps) {
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  const handleSave = async () => {
+    const result = await onSaveDocument(undefined, false);
+    if (result) {
+      // Only show modal for first save (when there was no existing document)
+      if (!lastSavedDocumentId) {
+        setShowShareModal(true);
+      }
+    }
+  };
+
+  const handleSaveNewCopy = async () => {
+    const result = await onSaveDocument(undefined, true);
+    if (result) {
+      // Always show modal for new copies (new share URL)
+      setShowShareModal(true);
+    }
+  };
+
+
   return (
     <div className="absolute top-0 left-0 right-0 z-20 bg-white shadow-sm p-4">
       <div className="flex flex-col items-center gap-4">
-        <div className="text-center">
+        <div className="text-center flex items-center gap-3">
           <h1 className="text-2xl font-bold text-gray-800">AI Image Canvas</h1>
+          {isLoadingDocument && (
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+              <span className="text-sm text-gray-600">Loading...</span>
+            </div>
+          )}
         </div>
         
         {/* Live Prompt Input */}
@@ -36,21 +77,31 @@ export default function CanvasHeader({
           />
           <div className="text-xs text-gray-500 text-center">
             {selectedImage ? 
-              `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.loadingState === 'waitingOnAPI' || selectedImage?.loadingState === 'urlLoading' ? '(updating...)' : ''}` : 
+              `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.displayState === 'updating' || selectedImage?.displayState === 'loading' ? '(updating...)' : ''}` : 
               'Type above to create a new image tile'
             }
           </div>
         </div>
         
         {/* Controls */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-center">
+          <FileMenu
+            imagesCount={imagesCount}
+            fileMenuStatus={fileMenuStatus}
+            lastSavedDocumentId={lastSavedDocumentId}
+            shareUrl={shareUrl}
+            onSave={handleSave}
+            onSaveNewCopy={handleSaveNewCopy}
+            onCopyShareUrl={onCopyShareUrl}
+          />
+          
           <button
             onClick={onOrganizeGrid}
             disabled={imagesCount === 0}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               imagesCount === 0
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-green-500 hover:bg-green-600 text-white'
+                : 'bg-purple-500 hover:bg-purple-600 text-white'
             }`}
           >
             📐 Organize Grid
@@ -68,6 +119,16 @@ export default function CanvasHeader({
           </button>
         </div>
       </div>
+      
+      {/* Share Modal */}
+      {shareUrl && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          shareUrl={shareUrl}
+          onCopyUrl={onCopyShareUrl}
+        />
+      )}
     </div>
   );
 } 

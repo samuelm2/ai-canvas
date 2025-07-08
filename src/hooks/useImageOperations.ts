@@ -42,6 +42,38 @@ export function useImageOperations(props: UseImageOperationsProps) {
 
   // Generate unique ID for new images
   const generateId = () => `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Smart z-index management with normalization
+  const MAX_Z_INDEX = 1000;
+  
+  const normalizeZIndexes = () => {
+    // Re-number all images from 1 to N based on current z-order
+    const sortedImages = [...imagesRef.current].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+    sortedImages.forEach((img, index) => {
+      updateImage(img.id, { zIndex: index + 1 });
+    });
+    console.log('Z-indexes normalized');
+  };
+  
+  const getSmartZIndex = (imageId: string) => {
+    const currentImage = imagesRef.current.find(img => img.id === imageId);
+    const maxZ = Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0));
+    
+    // If already on top, don't change z-index
+    if (currentImage?.zIndex === maxZ && maxZ > 0) {
+      return currentImage.zIndex;
+    }
+    
+    // If z-indexes are getting too high, normalize them
+    if (maxZ >= MAX_Z_INDEX) {
+      normalizeZIndexes();
+      // After normalization, bring this image to front
+      return imagesRef.current.length + 1;
+    }
+    
+    // Normal case: bring to front
+    return maxZ + 1;
+  };
 
   // Handle image dragging
   const handleImageDrag = useCallback((id: string, x: number, y: number) => {
@@ -52,11 +84,14 @@ export function useImageOperations(props: UseImageOperationsProps) {
   const handleImageSelect = useCallback((id: string) => {
     selectImage(id);
     
+    // Bring selected image to front (smart z-index)
+    updateImage(id, { zIndex: getSmartZIndex(id) });
+    
     const selectedImg = imagesRef.current.find(img => img.id === id);
     if (selectedImg?.prompt) {
       setCurrentPrompt(selectedImg.prompt);
     }
-  }, [selectImage, setCurrentPrompt]);
+  }, [selectImage, setCurrentPrompt, updateImage]);
 
   // Handle canvas click (deselection)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
@@ -83,7 +118,8 @@ export function useImageOperations(props: UseImageOperationsProps) {
       x: imageToDuplicate.x + 30,
       y: imageToDuplicate.y + 30,
       selected: false,
-      loadingState: 'finished',
+      displayState: 'ready',
+      zIndex: Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0)) + 1,
     };
     
     addImage(newImage);
@@ -125,7 +161,8 @@ export function useImageOperations(props: UseImageOperationsProps) {
         height: STANDARD_IMAGE_SIZE,
         prompt: `${imageToExpand.prompt} (generating variation...)`,
         selected: false,
-        loadingState: 'waitingOnAPI',
+        displayState: 'loading',
+        zIndex: Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0)) + 1 + index,
       };
     });
     
@@ -166,7 +203,8 @@ export function useImageOperations(props: UseImageOperationsProps) {
       height: 256,
       prompt,
       selected: true,
-      loadingState: 'waitingOnAPI',
+      displayState: 'loading',
+      zIndex: Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0)) + 1,
     };
     
     addImage(newImage);
@@ -183,7 +221,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
     
     updateImage(selectedImageId, { 
       prompt, 
-      loadingState: 'waitingOnAPI' 
+      displayState: 'updating' 
     });
     
     await generateImageForTile(selectedImageId, prompt);

@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+import { useSearchParams } from 'next/navigation';
 import { useImageCanvas } from '../hooks/useImageCanvas';
 import CanvasHeader from './CanvasHeader';
 import CanvasContent from './CanvasContent';
 
 export default function ImageCanvas() {
+  const searchParams = useSearchParams();
+  
   const {
     // State
     images,
@@ -32,6 +35,16 @@ export default function ImageCanvas() {
     organizeInGrid,
     clearCanvas,
     dismissError,
+    
+    // Document operations
+    saveDocument,
+    loadDocument,
+    copyShareUrl,
+    fileMenuStatus,
+    isLoadingDocument,
+    shareUrl,
+    lastSavedDocumentId,
+    
     cleanup,
   } = useImageCanvas();
 
@@ -63,6 +76,15 @@ export default function ImageCanvas() {
     clearCanvas();
   }, [debouncedPromptUpdate, clearCanvas]);
 
+  // Handle automatic document loading from URL (only on initial page load)
+  useEffect(() => {
+    const docId = searchParams.get('doc');
+    if (docId) {
+      loadDocument(docId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -80,6 +102,12 @@ export default function ImageCanvas() {
         onOrganizeGrid={organizeInGrid}
         onClearCanvas={handleClearCanvas}
         imagesCount={images.length}
+        onSaveDocument={saveDocument}
+        onCopyShareUrl={copyShareUrl}
+        fileMenuStatus={fileMenuStatus}
+        shareUrl={shareUrl}
+        lastSavedDocumentId={lastSavedDocumentId}
+        isLoadingDocument={isLoadingDocument}
       />
 
       {/* Error Display */}
@@ -106,8 +134,8 @@ export default function ImageCanvas() {
         onImageDelete={handleImageDelete}
         onImageDuplicate={handleImageDuplicate}
         onImageExpand={handleImageExpand}
-              isOrganizing={isOrganizing}
-            />
+        isOrganizing={isOrganizing}
+      />
 
       {/* Stats */}
       <div className="absolute bottom-4 left-4 text-sm text-gray-600 bg-white px-3 py-1 rounded-full shadow">
