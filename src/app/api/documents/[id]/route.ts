@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadDocument, updateDocument } from '../../../../lib/database';
+import { createSafeErrorResponse } from '../../../../lib/errors';
 
 export async function GET(
   request: NextRequest,
@@ -20,24 +21,14 @@ export async function GET(
 
     // Load document from database
     const document = await loadDocument(id);
-    
-    if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
-    }
 
     return NextResponse.json({
       success: true,
       document,
     });
   } catch (error: any) {
-    console.error('Error loading document:', error);
-    
-    let errorMessage = 'Failed to load document';
-    if (error.message) {
-      errorMessage = error.message;
-    }
-
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    const safeError = createSafeErrorResponse(error, 'Failed to load document', `GET /api/documents/${await params.then(p => p.id)}`);
+    return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }
 }
 
@@ -74,24 +65,14 @@ export async function PUT(
     }
 
     // Update document in database
-    const success = await updateDocument(id, title, images);
-    
-    if (!success) {
-      return NextResponse.json({ error: 'Document not found or update failed' }, { status: 404 });
-    }
+    await updateDocument(id, title, images);
 
     return NextResponse.json({
       success: true,
       documentId: id,
     });
   } catch (error: any) {
-    console.error('Error updating document:', error);
-    
-    let errorMessage = 'Failed to update document';
-    if (error.message) {
-      errorMessage = error.message;
-    }
-
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    const safeError = createSafeErrorResponse(error, 'Failed to update document', `PUT /api/documents/${await params.then(p => p.id)}`);
+    return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }
 } 

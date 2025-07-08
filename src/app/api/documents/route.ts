@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveDocument, initializeDatabase } from '../../../lib/database';
 import { SaveDocumentRequest } from '../../../types';
+import { createSafeErrorResponse } from '../../../lib/errors';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,13 +36,7 @@ export async function POST(request: NextRequest) {
       shareUrl,
     });
   } catch (error: any) {
-    console.error('Error saving document:', error);
-    
-    let errorMessage = 'Failed to save document';
-    if (error.message) {
-      errorMessage = error.message;
-    }
-
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    const safeError = createSafeErrorResponse(error, 'Failed to save document', 'POST /api/documents');
+    return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }
 } 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { createSafeErrorResponse } from '../../../lib/errors';
 
 const FAI_API_URL = 'https://fal.run/fal-ai/flux/schnell';
 
@@ -61,15 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No images returned from API' }, { status: 500 });
     }
   } catch (error: any) {
-    console.error('Error generating image:', error);
-    
-    let errorMessage = 'Failed to generate image';
-    if (error.response?.data?.detail) {
-      errorMessage = error.response.data.detail;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    const safeError = createSafeErrorResponse(error, 'Failed to generate image', 'POST /api/generate-image');
+    return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }
 } 
