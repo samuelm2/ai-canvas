@@ -8,7 +8,6 @@ const STANDARD_IMAGE_SIZE = 256;
 interface UseImageOperationsProps {
   images: CanvasImage[];
   selectedImageId: string | null;
-  currentPrompt: string;
   updateImage: (id: string, updates: Partial<CanvasImage>) => void;
   deleteImage: (id: string) => void;
   selectImage: (id: string | null) => void;
@@ -25,7 +24,6 @@ export function useImageOperations(props: UseImageOperationsProps) {
   const {
     images,
     selectedImageId,
-    currentPrompt,
     updateImage,
     deleteImage,
     selectImage,
@@ -37,8 +35,6 @@ export function useImageOperations(props: UseImageOperationsProps) {
     generatePromptVariations,
     cancelActiveRequest,
   } = props;
-
-  const isUserInputRef = useRef(false);
 
   // Generate unique ID for new images
   const generateId = () => `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -54,7 +50,6 @@ export function useImageOperations(props: UseImageOperationsProps) {
     
     const selectedImg = images.find(img => img.id === id);
     if (selectedImg?.prompt) {
-      isUserInputRef.current = false;
       setCurrentPrompt(selectedImg.prompt);
     }
   }, [images, selectImage, setCurrentPrompt]);
@@ -63,7 +58,6 @@ export function useImageOperations(props: UseImageOperationsProps) {
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       selectImage(null);
-      isUserInputRef.current = false;
       setCurrentPrompt('');
     }
   }, [selectImage, setCurrentPrompt]);
@@ -192,7 +186,6 @@ export function useImageOperations(props: UseImageOperationsProps) {
   }, [selectedImageId, cancelActiveRequest, updateImage, generateImageForTile]);
 
   return {
-    isUserInputRef,
     handleImageDrag,
     handleImageSelect,
     handleCanvasClick,

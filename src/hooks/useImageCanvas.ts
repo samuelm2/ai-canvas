@@ -15,7 +15,15 @@ export function useImageCanvas() {
   
   // Get image operations
   const imageOperations = useImageOperations({
-    ...canvasState,
+    images: canvasState.images,
+    selectedImageId: canvasState.selectedImageId,
+    updateImage: canvasState.updateImage,
+    deleteImage: canvasState.deleteImage,
+    selectImage: canvasState.selectImage,
+    setCurrentPrompt: canvasState.setCurrentPrompt,
+    setImages: canvasState.setImages,
+    addImage: canvasState.addImage,
+    setError: canvasState.setError,
     ...imageGeneration,
   });
   
@@ -39,9 +47,6 @@ export function useImageCanvas() {
     
     // State setters
     setCurrentPrompt: canvasState.setCurrentPrompt,
-    
-    // Refs
-    isUserInputRef: imageOperations.isUserInputRef,
     
     // Image operations
     createNewTile: imageOperations.createNewTile,

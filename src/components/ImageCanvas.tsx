@@ -10,13 +10,13 @@ export default function ImageCanvas() {
   const {
     // State
     images,
-    selectedImageId,
     selectedImage,
     currentPrompt,
-    setCurrentPrompt,
     isOrganizing,
     error,
-    isUserInputRef,
+    
+    // State setters
+    setCurrentPrompt,
     
     // Image operations
     createNewTile,
@@ -38,7 +38,7 @@ export default function ImageCanvas() {
   // Handle prompt processing with debouncing and maxWait (throttling)
   const debouncedPromptUpdate = useDebouncedCallback(
     (prompt: string) => {
-      if (selectedImageId) {
+      if (selectedImage) {
         updateSelectedTile(prompt);
       } else {
         createNewTile(prompt);
@@ -52,12 +52,9 @@ export default function ImageCanvas() {
   const handlePromptChange = useCallback((newPrompt: string) => {
     setCurrentPrompt(newPrompt);
     
-    // Mark this as user input
-    isUserInputRef.current = true;
-    
     // Use the debounced callback
     debouncedPromptUpdate(newPrompt);
-  }, [debouncedPromptUpdate, isUserInputRef, setCurrentPrompt]);
+  }, [debouncedPromptUpdate, setCurrentPrompt]);
 
   // Handle clearing canvas with debounce cleanup
   const handleClearCanvas = useCallback(() => {
@@ -79,7 +76,6 @@ export default function ImageCanvas() {
       <CanvasHeader 
         currentPrompt={currentPrompt}
         onPromptChange={handlePromptChange}
-        selectedImageId={selectedImageId}
         selectedImage={selectedImage}
         onOrganizeGrid={organizeInGrid}
         onClearCanvas={handleClearCanvas}
@@ -110,8 +106,8 @@ export default function ImageCanvas() {
         onImageDelete={handleImageDelete}
         onImageDuplicate={handleImageDuplicate}
         onImageExpand={handleImageExpand}
-        isOrganizing={isOrganizing}
-      />
+              isOrganizing={isOrganizing}
+            />
 
       {/* Stats */}
       <div className="absolute bottom-4 left-4 text-sm text-gray-600 bg-white px-3 py-1 rounded-full shadow">

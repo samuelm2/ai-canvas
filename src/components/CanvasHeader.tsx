@@ -5,7 +5,6 @@ import { CanvasImage } from '../types';
 interface CanvasHeaderProps {
   currentPrompt: string;
   onPromptChange: (prompt: string) => void;
-  selectedImageId: string | null;
   selectedImage: CanvasImage | undefined;
   onOrganizeGrid: () => void;
   onClearCanvas: () => void;
@@ -15,7 +14,6 @@ interface CanvasHeaderProps {
 export default function CanvasHeader({
   currentPrompt,
   onPromptChange,
-  selectedImageId,
   selectedImage,
   onOrganizeGrid,
   onClearCanvas,
@@ -33,12 +31,11 @@ export default function CanvasHeader({
           <PromptInput 
             value={currentPrompt}
             onChange={onPromptChange}
-            placeholder={selectedImageId ? "Edit prompt to live-update selected image..." : "Type to create a new image..."}
-            showSubmitButton={false}
+            placeholder={selectedImage ? "Edit prompt to live-update selected image..." : "Type to create a new image..."}
             className="mb-2"
           />
           <div className="text-xs text-gray-500 text-center">
-            {selectedImageId ? 
+            {selectedImage ? 
               `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.loadingState === 'waitingOnAPI' || selectedImage?.loadingState === 'urlLoading' ? '(updating...)' : ''}` : 
               'Type above to create a new image tile'
             }
