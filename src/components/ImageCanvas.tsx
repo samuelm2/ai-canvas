@@ -5,6 +5,7 @@ import DraggableImage from './DraggableImage';
 import PromptInput from './PromptInput';
 import { CanvasImage, GridConfig } from '../types';
 import { AIService } from '../services/aiService';
+import { useDebouncedCallback } from 'use-debounce';
 
 // Grid layout constants
 const GRID_GAP = 20;
@@ -20,8 +21,6 @@ export default function ImageCanvas() {
   const [isOrganizing, setIsOrganizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Simple debounce control
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isUserInputRef = useRef(false);
   
   // Track active requests for cancellation
@@ -52,6 +51,19 @@ export default function ImageCanvas() {
   // Get the currently selected image
   const selectedImage = images.find(img => img.id === selectedImageId);
 
+  // Handle prompt processing with debouncing and maxWait (throttling)
+  const debouncedPromptUpdate = useDebouncedCallback(
+    (prompt: string) => {
+      if (selectedImageId) {
+        updateSelectedTile(prompt);
+      } else {
+        createNewTile(prompt);
+      }
+    },
+    500, // debounce delay
+    { maxWait: 2000 } // ensure it fires at least every 2000ms
+  );
+
   // Handle prompt changes
   const handlePromptChange = useCallback((newPrompt: string) => {
     setCurrentPrompt(newPrompt);
@@ -60,24 +72,10 @@ export default function ImageCanvas() {
     // Mark this as user input
     isUserInputRef.current = true;
     
-    // Clear existing timers
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
+    // Use the debounced callback
+    debouncedPromptUpdate(newPrompt);
     
-    // Set debounce timer for when user stops typing
-    debounceTimeoutRef.current = setTimeout(() => {
-      isUserInputRef.current = false;
-      
-      // Process final prompt
-      if (selectedImageId) {
-        updateSelectedTile(newPrompt);
-      } else {
-        createNewTile(newPrompt);
-      }
-    }, 300);
-    
-  }, [selectedImageId]);
+  }, [debouncedPromptUpdate]);
 
   // Cancel any active request for a tile
   const cancelActiveRequest = (tileId: string) => {
@@ -395,28 +393,21 @@ export default function ImageCanvas() {
     isUserInputRef.current = false; // Prevent generation
     setCurrentPrompt('');
     
-    // Clear any pending timers
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-  }, []);
+    // Cancel any pending debounced calls
+    debouncedPromptUpdate.cancel();
+  }, [debouncedPromptUpdate]);
 
   // Dismiss error
   const dismissError = useCallback(() => {
     setError(null);
   }, []);
 
-  // Cleanup timers and active requests on unmount
+  // Cleanup active requests on unmount (timers handled by hook)
   useEffect(() => {
     return () => {
       // Cancel all active requests
       activeRequestsRef.current.forEach(controller => controller.abort());
       activeRequestsRef.current.clear();
-      
-      // Clear all timers
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
     };
   }, []);
 
@@ -444,7 +435,7 @@ export default function ImageCanvas() {
             <div className="text-xs text-gray-500 text-center">
               {selectedImageId ? 
                 `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.loadingState === 'waitingOnAPI' || selectedImage?.loadingState === 'urlLoading' ? '(updating...)' : ''}` : 
-                'Type above to create a new image tile • Updates after you finish typing'
+                'Type above to create a new image tile • Updates after 500ms of no typing (max 2s while typing)'
               }
             </div>
           </div>
