@@ -7,6 +7,8 @@ interface UseDocumentOperationsProps {
   setImages: (images: CanvasImage[]) => void;
   setError: (error: string | null) => void;
   clearAll: () => void;
+  updateImage: (id: string, updates: Partial<CanvasImage>) => void;
+  preloadImage: (url: string) => Promise<void>;
 }
 
 export function useDocumentOperations({
@@ -14,6 +16,8 @@ export function useDocumentOperations({
   setImages,
   setError,
   clearAll,
+  updateImage,
+  preloadImage,
 }: UseDocumentOperationsProps) {
   const [fileMenuStatus, setFileMenuStatus] = useState<FileMenuStatus>('idle');
   const [isLoading, setIsLoading] = useState(false);
@@ -105,6 +109,23 @@ export function useDocumentOperations({
         const deserializedImages = DocumentService.deserializeImages(result.document.images);
         setImages(deserializedImages);
         
+        // Preload all images and update their loading states
+        deserializedImages.forEach(async (image) => {
+          const originalSrc = (image as any).originalSrc;
+          if (originalSrc) {
+            try {
+              await preloadImage(originalSrc);
+              updateImage(image.id, { 
+                src: originalSrc, 
+                displayState: 'ready' 
+              });
+                          } catch (error) {
+                console.error('Failed to preload image:', error);
+                updateImage(image.id, { displayState: 'ready' });
+              }
+          }
+        });
+        
         setLastSavedDocumentId(documentId);
         
         // Set share URL for existing document
@@ -127,7 +148,7 @@ export function useDocumentOperations({
     } finally {
       setIsLoading(false);
     }
-  }, [setImages, setError, clearAll]);
+  }, [setImages, setError, clearAll, updateImage, preloadImage]);
 
   // Copy share URL to clipboard
   const copyShareUrl = useCallback(async () => {

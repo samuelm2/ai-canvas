@@ -93,7 +93,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         />
         
         {/* Image */}
-        {image.src && image.loadingState === 'finished' ? (
+        {image.displayState === 'ready' ? (
           <img
             src={image.src}
             alt={image.prompt || 'Generated image'}
@@ -109,7 +109,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
               msUserSelect: 'none',
             }}
           />
-        ) : image.src && image.loadingState !== 'finished' ? (
+        ) : image.displayState === 'updating' ? (
           <img
             src={image.src}
             alt={image.prompt || 'Generated image'}
@@ -131,17 +131,13 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
           } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}>
             <div className="text-center text-gray-500">
               <div className="text-4xl mb-2">🎨</div>
-              <p className="text-sm">
-                {image.loadingState === 'waitingOnAPI' ? 'Generating...' : 
-                 image.loadingState === 'urlLoading' ? 'Loading...' : 
-                 'Loading...'}
-              </p>
+              <p className="text-sm">Loading...</p>
             </div>
           </div>
         )}
         
         {/* Small corner loading indicator */}
-        {(image.loadingState === 'waitingOnAPI' || image.loadingState === 'urlLoading') && (
+        {(image.displayState === 'loading' || image.displayState === 'updating') && (
           <div className="absolute top-2 left-2 z-30">
             <div className="bg-blue-500 bg-opacity-90 rounded-full p-1.5 shadow-lg">
               <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>

@@ -1,4 +1,4 @@
-export type ImageLoadingState = 'waitingOnAPI' | 'urlLoading' | 'finished';
+export type ImageDisplayState = 'loading' | 'updating' | 'ready';
 
 export interface CanvasImage {
   id: string;
@@ -9,7 +9,7 @@ export interface CanvasImage {
   height: number;
   prompt?: string;
   selected?: boolean;
-  loadingState?: ImageLoadingState;
+  displayState?: ImageDisplayState;
   zIndex?: number;
 }
 

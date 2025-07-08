@@ -46,28 +46,29 @@ export function useImageGeneration({ updateImage, setError }: UseImageGeneration
       activeRequestsRef.current.delete(tileId);
       
       if (result.success && result.imageUrl) {
-        updateImage(tileId, { loadingState: 'urlLoading' });
+        // Don't change displayState to 'loading' if we're updating an existing image
+        // (it should stay as 'updating' to show the dimmed previous image)
         
         try {
           await preloadImage(result.imageUrl);
           updateImage(tileId, { 
             src: result.imageUrl, 
-            loadingState: 'finished' 
+            displayState: 'ready' 
           });
         } catch {
           setError('Failed to load image');
-          updateImage(tileId, { loadingState: 'finished' });
+          updateImage(tileId, { displayState: 'ready' });
         }
       } else if (result.error !== 'Request cancelled') {
         setError(result.error || 'Failed to generate image');
-        updateImage(tileId, { loadingState: 'finished' });
+        updateImage(tileId, { displayState: 'ready' });
       }
     } catch (err: any) {
       activeRequestsRef.current.delete(tileId);
       
       if (err.name !== 'AbortError') {
         setError('Network error occurred');
-        updateImage(tileId, { loadingState: 'finished' });
+        updateImage(tileId, { displayState: 'ready' });
       }
     }
   }, [updateImage, setError, cancelActiveRequest]);
@@ -101,5 +102,6 @@ export function useImageGeneration({ updateImage, setError }: UseImageGeneration
     generatePromptVariations,
     cancelActiveRequest,
     cleanup,
+    preloadImage,
   };
 } 

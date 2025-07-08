@@ -34,6 +34,8 @@ export function useImageCanvas() {
     setImages: canvasState.setImages,
     setError: canvasState.setError,
     clearAll: canvasState.clearAll,
+    updateImage: canvasState.updateImage,
+    preloadImage: imageGeneration.preloadImage,
   });
 
   // Get canvas layout operations

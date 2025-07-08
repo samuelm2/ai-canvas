@@ -118,7 +118,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
       x: imageToDuplicate.x + 30,
       y: imageToDuplicate.y + 30,
       selected: false,
-      loadingState: 'finished',
+      displayState: 'ready',
       zIndex: Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0)) + 1,
     };
     
@@ -161,7 +161,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
         height: STANDARD_IMAGE_SIZE,
         prompt: `${imageToExpand.prompt} (generating variation...)`,
         selected: false,
-        loadingState: 'waitingOnAPI',
+        displayState: 'loading',
         zIndex: Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0)) + 1 + index,
       };
     });
@@ -203,7 +203,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
       height: 256,
       prompt,
       selected: true,
-      loadingState: 'waitingOnAPI',
+      displayState: 'loading',
       zIndex: Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0)) + 1,
     };
     
@@ -221,7 +221,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
     
     updateImage(selectedImageId, { 
       prompt, 
-      loadingState: 'waitingOnAPI' 
+      displayState: 'updating' 
     });
     
     await generateImageForTile(selectedImageId, prompt);

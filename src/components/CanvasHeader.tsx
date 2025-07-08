@@ -69,7 +69,7 @@ export default function CanvasHeader({
           />
           <div className="text-xs text-gray-500 text-center">
             {selectedImage ? 
-              `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.loadingState === 'waitingOnAPI' || selectedImage?.loadingState === 'urlLoading' ? '(updating...)' : ''}` : 
+              `Live editing: ${selectedImage?.prompt || 'Selected image'} ${selectedImage?.displayState === 'updating' || selectedImage?.displayState === 'loading' ? '(updating...)' : ''}` : 
               'Type above to create a new image tile'
             }
           </div>

@@ -14,7 +14,7 @@ export class DocumentService {
         height: img.height,
         prompt: img.prompt,
         zIndex: img.zIndex || 1,
-        // Exclude selected, loadingState as these are UI-only
+        // Exclude selected, displayState as these are UI-only
       }));
 
       const requestData: SaveDocumentRequest = {
@@ -83,9 +83,11 @@ export class DocumentService {
   static deserializeImages(serializedImages: any[]): CanvasImage[] {
     return serializedImages.map(img => ({
       ...img,
+      src: '', // Initially no src so it shows loading placeholder
       selected: false, // Reset UI state
-      loadingState: 'finished' as const, // Reset loading state
+              displayState: 'loading' as const, // Set to loading state initially
       zIndex: img.zIndex || 1, // Ensure zIndex exists
+      originalSrc: img.src, // Store original src for preloading
     }));
   }
 
@@ -101,7 +103,7 @@ export class DocumentService {
         height: img.height,
         prompt: img.prompt,
         zIndex: img.zIndex || 1,
-        // Exclude selected, loadingState as these are UI-only
+        // Exclude selected, displayState as these are UI-only
       }));
 
       const requestData = {
