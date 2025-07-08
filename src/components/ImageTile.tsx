@@ -93,7 +93,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         />
         
         {/* Image */}
-        {image.displayState === 'ready' ? (
+        {image.displayState === 'ready' && image.src ? (
           <img
             src={image.src}
             alt={image.prompt || 'Generated image'}
@@ -109,7 +109,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
               msUserSelect: 'none',
             }}
           />
-        ) : image.displayState === 'updating' ? (
+        ) : image.displayState === 'updating' && image.src ? (
           <img
             src={image.src}
             alt={image.prompt || 'Generated image'}
