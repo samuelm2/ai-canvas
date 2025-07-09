@@ -51,4 +51,10 @@ export interface LoadDocumentResponse {
   error?: string;
 }
 
+export interface PromptVariationsResponse {
+  success: boolean;
+  variations?: string[];
+  error?: string;
+}
+
 export type FileMenuStatus = 'idle' | 'saving' | 'savingNewCopy' | 'saved' | 'copied'; 
