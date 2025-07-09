@@ -1,5 +1,6 @@
 import axios, { isAxiosError } from 'axios';
 import { SaveDocumentRequest, SaveDocumentResponse, LoadDocumentResponse, CanvasImage, SerializedCanvasImage } from '../types';
+import { extractErrorMessage } from '../utils/errorUtils';
 
 export class DocumentService {
   static async saveDocument(title: string | undefined, images: CanvasImage[]): Promise<SaveDocumentResponse> {
@@ -35,12 +36,7 @@ export class DocumentService {
     } catch (error: unknown) {
       console.error('Error saving document:', error);
       
-      let errorMessage = 'Failed to save document';
-      if (isAxiosError(error) && error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage = extractErrorMessage(error, 'Failed to save document');
 
       return {
         success: false,
@@ -64,12 +60,7 @@ export class DocumentService {
     } catch (error: unknown) {
       console.error('Error loading document:', error);
       
-      let errorMessage = 'Failed to load document';
-      if (isAxiosError(error) && error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage = extractErrorMessage(error, 'Failed to load document');
 
       return {
         success: false,
@@ -121,12 +112,7 @@ export class DocumentService {
     } catch (error: unknown) {
       console.error('Error updating document:', error);
       
-      let errorMessage = 'Failed to update document';
-      if (isAxiosError(error) && error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage = extractErrorMessage(error, 'Failed to update document');
 
       return {
         success: false,
