@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { SaveDocumentRequest, SaveDocumentResponse, LoadDocumentResponse, CanvasImage } from '../types';
+import axios, { isAxiosError } from 'axios';
+import { SaveDocumentRequest, SaveDocumentResponse, LoadDocumentResponse, CanvasImage, SerializedCanvasImage } from '../types';
 
 export class DocumentService {
   static async saveDocument(title: string | undefined, images: CanvasImage[]): Promise<SaveDocumentResponse> {
@@ -33,13 +33,13 @@ export class DocumentService {
         documentId: response.data.documentId,
         shareUrl: response.data.shareUrl,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving document:', error);
       
       let errorMessage = 'Failed to save document';
-      if (error.response?.data?.error) {
+      if (isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
-      } else if (error.message) {
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
 
@@ -62,13 +62,13 @@ export class DocumentService {
         success: true,
         document: response.data.document,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading document:', error);
       
       let errorMessage = 'Failed to load document';
-      if (error.response?.data?.error) {
+      if (isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
-      } else if (error.message) {
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
 
@@ -80,13 +80,12 @@ export class DocumentService {
   }
 
     // Utility function to deserialize loaded images back to CanvasImage format
-  static deserializeImages(serializedImages: any[]): CanvasImage[] {
+  static deserializeImages(serializedImages: SerializedCanvasImage[]): CanvasImage[] {
     return serializedImages.map(img => ({
       ...img,
       src: '', // Initially no src so it shows loading placeholder
       selected: false, // Reset UI state
       displayState: 'loading' as const, // Set to loading state initially
-      zIndex: img.zIndex || 1, // Ensure zIndex exists
     }));
   }
 
@@ -110,7 +109,7 @@ export class DocumentService {
         images: serializedImages,
       };
 
-      const response = await axios.put(`/api/documents/${documentId}`, requestData, {
+      await axios.put(`/api/documents/${documentId}`, requestData, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -124,13 +123,13 @@ export class DocumentService {
         documentId,
         shareUrl,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating document:', error);
       
       let errorMessage = 'Failed to update document';
-      if (error.response?.data?.error) {
+      if (isAxiosError(error) && error.response?.data?.error) {
         errorMessage = error.response.data.error;
-      } else if (error.message) {
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
 
