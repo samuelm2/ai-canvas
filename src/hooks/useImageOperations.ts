@@ -209,7 +209,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
       setError('Failed to expand image');
       setImages(imagesRef.current.filter(img => !placeholderImages.some(ph => ph.id === img.id)));
     }
-  }, [setImages, setError, updateImage, generateImageForTile, generatePromptVariations, getSmartZIndex]);
+  }, [setImages, setError, updateImage, generateImageForTile, generatePromptVariations]);
 
   // Create a new tile
   const createNewTile = useCallback(async (prompt: string) => {
