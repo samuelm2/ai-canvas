@@ -46,16 +46,16 @@ export function useImageOperations(props: UseImageOperationsProps) {
   // Smart z-index management with normalization
   const MAX_Z_INDEX = 1000;
   
-  const normalizeZIndexes = () => {
+  const normalizeZIndexes = useCallback(() => {
     // Re-number all images from 1 to N based on current z-order
     const sortedImages = [...imagesRef.current].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
     sortedImages.forEach((img, index) => {
       updateImage(img.id, { zIndex: index + 1 });
     });
     console.log('Z-indexes normalized');
-  };
+  }, [updateImage]);
   
-  const getSmartZIndex = (imageId: string) => {
+  const getSmartZIndex = useCallback((imageId: string) => {
     const currentImage = imagesRef.current.find(img => img.id === imageId);
     const maxZ = Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0));
     
@@ -73,7 +73,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
     
     // Normal case: bring to front
     return maxZ + 1;
-  };
+  }, [normalizeZIndexes]);
 
   // Handle image dragging
   const handleImageDrag = useCallback((id: string, x: number, y: number) => {
