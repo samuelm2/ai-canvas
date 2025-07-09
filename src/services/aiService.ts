@@ -39,22 +39,6 @@ export class AIService {
       
       console.error('Error generating image:', error);
       
-      // Log error details for debugging
-      if (isAxiosError(error)) {
-        console.log('🔍 Axios Error details:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          code: error.code
-        });
-      } else if (error instanceof Error) {
-        console.log('🔍 Error details:', {
-          name: error.name,
-          message: error.message
-        });
-      } else {
-        console.log('🔍 Unknown error type:', typeof error);
-      }
-      
       const errorMessage = extractErrorMessage(error, 'Failed to generate image');
 
       return {

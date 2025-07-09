@@ -64,7 +64,6 @@ export function useImageGeneration({ updateImage, setError }: UseImageGeneration
         updateImage(tileId, { displayState: 'ready' });
       }
     } catch (err: unknown) {
-      console.log('🔴 generateImageForTile caught error:', err);
       activeRequestsRef.current.delete(tileId);
       
       if (err instanceof Error && err.name !== 'AbortError') {
