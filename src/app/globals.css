@@ -14,9 +14,9 @@
   --z-dragged-image: 1000;  /* Images being dragged */
   --z-dropdown-bg: 4999;    /* Click-outside overlay for dropdowns */
   --z-dropdown: 5000;       /* Dropdown menus */
-  --z-alerts: 8000;         /* Error/alert messages - above all content */
   --z-header: 10000;        /* Header container */
   --z-modal: 10000;         /* Modal content */
+  --z-alerts: 15000;        /* Error/alert messages - above all content including header */
   --z-overlay: 20000;       /* Modal overlays */
 }
 
@@ -166,7 +166,7 @@ body {
   
   /* Tooltip Styles */
   .tooltip {
-    @apply bg-black bg-opacity-75 text-white text-xs p-2 rounded-b-lg;
+    @apply bg-black bg-opacity-75 text-white text-xs p-2 rounded-lg shadow-lg;
   }
 }
 

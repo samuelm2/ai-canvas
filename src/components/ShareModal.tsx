@@ -29,7 +29,7 @@ export default function ShareModal({ isOpen, onClose, shareUrl, onCopyUrl }: Sha
         <p className="text-gray-600 mb-4">
           Your canvas has been saved and can be shared with this link:
         </p>
-        <div className="bg-gray-100 p-3 rounded-lg mb-4 break-all text-sm text-gray-700 font-mono">
+        <div className="bg-gray-100 p-3 rounded-lg mb-4 overflow-x-auto text-sm text-gray-700 font-mono whitespace-nowrap">
           {shareUrl}
         </div>
         <div className="flex gap-2 justify-end">
