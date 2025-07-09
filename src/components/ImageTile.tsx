@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import Image from 'next/image';
 import { CanvasImage } from '../types';
@@ -15,7 +15,7 @@ interface ImageTileProps {
   isOrganizing: boolean;
 }
 
-export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, isOrganizing }: ImageTileProps) {
+function ImageTile({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, isOrganizing }: ImageTileProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const nodeRef = useRef(null);
@@ -206,4 +206,6 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
       </div>
     </Draggable>
   );
-} 
+}
+
+export default React.memo(ImageTile); 
