@@ -131,6 +131,20 @@ export function useImageOperations(props: UseImageOperationsProps) {
     const imageToExpand = imagesRef.current.find(img => img.id === id);
     if (!imageToExpand?.prompt) return;
     
+    // Get the current max z-index
+    const currentMaxZ = Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0));
+    
+    // Create placeholder images with z-indexes starting from currentMaxZ + 1
+    const placeholderStartZ = currentMaxZ + 1;
+    
+    // The expanded image should be on top of placeholders
+    const expandedImageZ = placeholderStartZ + 4;
+    
+    // Update the expanded image's z-index in the current images array
+    const updatedImages = imagesRef.current.map(img => 
+      img.id === id ? { ...img, zIndex: expandedImageZ } : img
+    );
+    
     const crossSpacing = STANDARD_IMAGE_SIZE + GRID_GAP * 2;
     const negativeThreshold = STANDARD_IMAGE_SIZE * 0.3;
     
@@ -163,11 +177,11 @@ export function useImageOperations(props: UseImageOperationsProps) {
         prompt: `${imageToExpand.prompt} (generating variation...)`,
         selected: false,
         displayState: 'loading',
-        zIndex: Math.max(0, ...imagesRef.current.map(img => img.zIndex || 0)) + 1 + index,
+        zIndex: placeholderStartZ + index,
       };
     });
     
-    setImages([...imagesRef.current, ...placeholderImages]);
+    setImages([...updatedImages, ...placeholderImages]);
     
     try {
       const variationsResult = await generatePromptVariations(imageToExpand.prompt);
@@ -189,7 +203,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
       setError('Failed to expand image');
       setImages(imagesRef.current.filter(img => !placeholderImages.some(ph => ph.id === img.id)));
     }
-  }, [setImages, setError, updateImage, generateImageForTile, generatePromptVariations]);
+  }, [setImages, setError, updateImage, generateImageForTile, generatePromptVariations, getSmartZIndex]);
 
   // Create a new tile
   const createNewTile = useCallback(async (prompt: string) => {

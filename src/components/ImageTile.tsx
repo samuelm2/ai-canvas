@@ -90,7 +90,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         {/* Drag Handle */}
         <div 
           className="drag-handle absolute inset-0 cursor-move" 
-          style={{ zIndex: 'var(--z-drag-handle)' }}
+          style={{ zIndex: 2 }}
           title="Drag to move"
         />
         
@@ -186,7 +186,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         )}
         
         {/* Prompt tooltip */}
-        {image.prompt && image.selected && !isDragging && (
+        {image.prompt && image.selected && (
           <div className="absolute top-full left-0 mt-2 z-10 max-w-64">
             <div className="tooltip whitespace-normal" style={{ width: 'max-content', maxWidth: '100%' }}>
               {image.prompt}
