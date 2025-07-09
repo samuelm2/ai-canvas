@@ -11,7 +11,7 @@ export function useImageCanvas() {
   // Get image generation capabilities
   const imageGeneration = useImageGeneration({
     updateImage: canvasState.updateImage,
-    setError: canvasState.setError,
+    setError: canvasState.setErrorModal,
   });
   
   // Get image operations
@@ -24,7 +24,7 @@ export function useImageCanvas() {
     setCurrentPrompt: canvasState.setCurrentPrompt,
     setImages: canvasState.setImages,
     addImage: canvasState.addImage,
-    setError: canvasState.setError,
+    setError: canvasState.setErrorModal,
     ...imageGeneration,
   });
   
@@ -32,7 +32,7 @@ export function useImageCanvas() {
   const documentOps = useDocumentOperations({
     images: canvasState.images,
     setImages: canvasState.setImages,
-    setError: canvasState.setError,
+    setError: canvasState.setErrorModal,
     clearAll: canvasState.clearAll,
     updateImage: canvasState.updateImage,
     preloadImage: imageGeneration.preloadImage,
@@ -59,6 +59,7 @@ export function useImageCanvas() {
     
     // State setters
     setCurrentPrompt: canvasState.setCurrentPrompt,
+    setErrorModal: canvasState.setErrorModal,
     
     // Image operations
     createNewTile: imageOperations.createNewTile,

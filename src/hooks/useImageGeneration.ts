@@ -80,7 +80,11 @@ export function useImageGeneration({ updateImage, setError }: UseImageGeneration
       return result;
     } catch (error) {
       console.error('Error generating prompt variations:', error);
-      throw error;
+      return {
+        success: false,
+        error: 'Failed to generate prompt variations',
+        variations: []
+      };
     }
   }, []);
 

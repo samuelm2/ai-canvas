@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useImageCanvas } from '../hooks/useImageCanvas';
 import CanvasHeader from './CanvasHeader';
 import CanvasContent from './CanvasContent';
+import ErrorTester from './ErrorTester';
 
 export default function ImageCanvas() {
   const searchParams = useSearchParams();
@@ -20,6 +21,7 @@ export default function ImageCanvas() {
     
     // State setters
     setCurrentPrompt,
+    setErrorModal,
     
     // Image operations
     createNewTile,
@@ -110,20 +112,10 @@ export default function ImageCanvas() {
         isLoadingDocument={isLoadingDocument}
       />
 
-      {/* Error Display */}
-      {error && (
-        <div className="absolute top-44 left-4 right-4 alert-error" style={{ zIndex: 'var(--z-alerts)' }}>
-          <div className="flex justify-between items-center">
-            <span>{error}</span>
-            <button
-              onClick={dismissError}
-              className="text-red-500 hover:text-red-700 font-bold"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Dev Tools */}
+      {process.env.NODE_ENV === 'development' && <ErrorTester onTestError={setErrorModal} />}
+
+
 
       {/* Canvas Content */}
       <CanvasContent 
@@ -136,6 +128,23 @@ export default function ImageCanvas() {
         onImageExpand={handleImageExpand}
         isOrganizing={isOrganizing}
       />
+
+      {/* Error Display */}
+      {error && (
+        <div className="absolute bottom-4 left-4 max-w-md alert-error" style={{ zIndex: 'var(--z-alerts)' }}>
+          <div className="flex justify-between items-center">
+            <span>{error}</span>
+            <button
+              onClick={dismissError}
+              className="text-red-500 hover:text-red-700 font-bold"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+
 
       {/* Stats */}
       <div className="absolute bottom-4 left-4 stats-badge">

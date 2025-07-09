@@ -265,7 +265,7 @@ describe('useCanvasState', () => {
         result.current.selectImage('img1');
         result.current.setCurrentPrompt('test prompt');
         result.current.setIsOrganizing(true);
-        result.current.setError('test error');
+        result.current.setErrorModal('test error');
       });
 
       act(() => {
@@ -316,7 +316,7 @@ describe('useCanvasState', () => {
       const { result } = renderHook(() => useCanvasState());
 
       act(() => {
-        result.current.setError('test error');
+        result.current.setErrorModal('test error');
       });
 
       expect(result.current.error).toBe('test error');
@@ -328,7 +328,7 @@ describe('useCanvasState', () => {
       const { result } = renderHook(() => useCanvasState());
 
       act(() => {
-        result.current.setError('test error');
+        result.current.setErrorModal('test error');
       });
 
       expect(result.current.error).toBe('test error');

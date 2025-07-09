@@ -5,7 +5,7 @@ import PromptInput from './PromptInput';
 import ShareModal from './ShareModal';
 import FileMenu from './FileMenu';
 import { CanvasImage, FileMenuStatus } from '../types';
-import ErrorTester from './ErrorTester';
+
 
 interface CanvasHeaderProps {
   currentPrompt: string;
@@ -87,7 +87,7 @@ export default function CanvasHeader({
             }
           </div>
         </div>
-        {process.env.NODE_ENV === 'development' && <ErrorTester />}
+        
         {/* Controls */}
         <div className="flex gap-2 flex-wrap justify-center">
           <FileMenu

@@ -6,7 +6,7 @@ export function useCanvasState() {
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [currentPrompt, setCurrentPrompt] = useState<string>('');
   const [isOrganizing, setIsOrganizing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setErrorModal] = useState<string | null>(null);
 
   // Computed values
   const selectedImage = images.find(img => img.id === selectedImageId);
@@ -41,11 +41,11 @@ export function useCanvasState() {
     setImages([]);
     setSelectedImageId(null);
     setCurrentPrompt('');
-    setError(null);
+    setErrorModal(null);
   }, []);
 
   const dismissError = useCallback(() => {
-    setError(null);
+    setErrorModal(null);
   }, []);
 
   return {
@@ -61,7 +61,7 @@ export function useCanvasState() {
     setImages,
     setCurrentPrompt,
     setIsOrganizing,
-    setError,
+    setErrorModal,
     
     // Operations
     addImage,
