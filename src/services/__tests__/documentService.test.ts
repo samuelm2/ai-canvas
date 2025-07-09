@@ -291,7 +291,7 @@ describe('DocumentService', () => {
       expect(result).toEqual({
         success: true,
         documentId: 'doc123',
-        shareUrl: expect.stringContaining('fdjskfljdskal'),
+        shareUrl: expect.stringContaining('doc123'),
       });
     });
 
