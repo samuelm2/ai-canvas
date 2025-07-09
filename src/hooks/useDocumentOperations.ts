@@ -58,10 +58,13 @@ export function useDocumentOperations({
         result = await DocumentService.saveDocument(title, images);
       }
       
-      if (result.success && result.documentId && result.shareUrl) {
+      if (result.success && result.documentId) {
         // Always update to track the current document (whether updated or new)
         setLastSavedDocumentId(result.documentId);
-        setShareUrl(result.shareUrl);
+        
+        // Generate shareUrl dynamically
+        const generatedShareUrl = DocumentService.generateShareUrl(result.documentId);
+        setShareUrl(generatedShareUrl);
         
         // Update URL parameter when saving a new copy
         if (forceNew || !lastSavedDocumentId) {
@@ -78,7 +81,7 @@ export function useDocumentOperations({
         
         return {
           documentId: result.documentId,
-          shareUrl: result.shareUrl,
+          shareUrl: generatedShareUrl,
         };
       } else {
         setError(result.error || 'Failed to save document');

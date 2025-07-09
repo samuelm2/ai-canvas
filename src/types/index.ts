@@ -52,7 +52,6 @@ export interface SaveDocumentRequest {
 export interface SaveDocumentResponse {
   success: boolean;
   documentId?: string;
-  shareUrl?: string;
   error?: string;
 }
 
