@@ -113,7 +113,7 @@ export function useDocumentOperations({
         setImages(deserializedImages);
         
         // Preload all images and update their loading states
-        result.document.images.forEach(async (originalImage: Partial<CanvasImage>, index: number) => {
+        await Promise.all(result.document.images.map(async (originalImage: Partial<CanvasImage>, index: number) => {
           const deserializedImage = deserializedImages[index];
           if (originalImage.src) {
             try {
@@ -127,7 +127,7 @@ export function useDocumentOperations({
               updateImage(deserializedImage.id, { displayState: 'ready' });
             }
           }
-        });
+        }));
         
         setLastSavedDocumentId(documentId);
         

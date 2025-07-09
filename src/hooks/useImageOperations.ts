@@ -192,11 +192,17 @@ export function useImageOperations(props: UseImageOperationsProps) {
         return;
       }
       
-      placeholderImages.forEach(async (placeholderImage, index) => {
+      const results = await Promise.allSettled(placeholderImages.map(async (placeholderImage, index) => {
         const actualPrompt = variationsResult.variations![index];
         updateImage(placeholderImage.id, { prompt: actualPrompt });
         await generateImageForTile(placeholderImage.id, actualPrompt);
-      });
+      }));
+      
+      // Check if any failed and show appropriate error
+      const failedCount = results.filter(result => result.status === 'rejected').length;
+      if (failedCount > 0) {
+        setError(`Failed to generate ${failedCount} of 4 variations`);
+      }
       
     } catch (error) {
       console.error('Error expanding image:', error);
