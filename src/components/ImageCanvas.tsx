@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import { useImageCanvas } from '../hooks/useImageCanvas';
 import CanvasHeader from './CanvasHeader';
 import CanvasContent from './CanvasContent';
-import ErrorTester from './ErrorTester';
 
 export default function ImageCanvas() {
   const searchParams = useSearchParams();
@@ -110,9 +109,6 @@ export default function ImageCanvas() {
         lastSavedDocumentId={lastSavedDocumentId}
         isLoadingDocument={isLoadingDocument}
       />
-
-      {/* Error Tester */}
-      {process.env.NODE_ENV === 'development' && <ErrorTester />}
 
       {/* Error Display */}
       {error && (
