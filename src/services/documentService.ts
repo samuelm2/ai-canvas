@@ -1,4 +1,4 @@
-import axios, { isAxiosError } from 'axios';
+import axios from 'axios';
 import { SaveDocumentRequest, SaveDocumentResponse, LoadDocumentResponse, CanvasImage, SerializedCanvasImage } from '../types';
 import { extractErrorMessage } from '../utils/errorUtils';
 
