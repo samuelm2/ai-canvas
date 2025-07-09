@@ -195,7 +195,7 @@ describe('AIService', () => {
       expect(mockedAxios.post).not.toHaveBeenCalled();
       expect(result).toEqual({
         success: false,
-        error: 'Failed to generate variations',
+        error: 'Original prompt is required and cannot be empty',
       });
     });
 
@@ -205,7 +205,7 @@ describe('AIService', () => {
       expect(mockedAxios.post).not.toHaveBeenCalled();
       expect(result).toEqual({
         success: false,
-        error: 'Failed to generate variations',
+        error: 'Original prompt is required and cannot be empty',
       });
     });
 
@@ -288,7 +288,7 @@ describe('AIService', () => {
 
       expect(result).toEqual({
         success: false,
-        error: 'Failed to generate variations',
+        error: 'Network error',
       });
     });
   });
