@@ -13,6 +13,17 @@ export interface CanvasImage {
   zIndex?: number;
 }
 
+export interface SerializedCanvasImage {
+  id: string;
+  src: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  prompt?: string;
+  zIndex: number;
+}
+
 export interface GridConfig {
   gap: number;
   startX: number;
@@ -28,7 +39,7 @@ export interface AIImageResponse {
 export interface CanvasDocument {
   id: string;
   title?: string;
-  images: CanvasImage[];
+  images: SerializedCanvasImage[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,6 +59,12 @@ export interface SaveDocumentResponse {
 export interface LoadDocumentResponse {
   success: boolean;
   document?: CanvasDocument;
+  error?: string;
+}
+
+export interface PromptVariationsResponse {
+  success: boolean;
+  variations?: string[];
   error?: string;
 }
 

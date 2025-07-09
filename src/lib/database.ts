@@ -5,6 +5,7 @@
  */
 import { Pool } from 'pg';
 import { AppError, ErrorType, wrapDatabaseOperation } from './errors';
+import { CanvasImage, CanvasDocument } from '../types';
 
 // Database connection pool
 let pool: Pool | null = null;
@@ -69,7 +70,7 @@ export async function initializeDatabase() {
 }
 
 // Database operations for canvas documents
-export async function saveDocument(title: string | undefined, images: any[]): Promise<string> {
+export async function saveDocument(title: string | undefined, images: CanvasImage[]): Promise<string> {
   return wrapDatabaseOperation(async () => {
     const pool = getPool();
     
@@ -84,7 +85,7 @@ export async function saveDocument(title: string | undefined, images: any[]): Pr
   }, 'save document');
 }
 
-export async function loadDocument(id: string): Promise<any | null> {
+export async function loadDocument(id: string): Promise<CanvasDocument | null> {
   return wrapDatabaseOperation(async () => {
     const pool = getPool();
     
@@ -114,7 +115,7 @@ export async function loadDocument(id: string): Promise<any | null> {
   }, 'load document');
 }
 
-export async function updateDocument(id: string, title: string | undefined, images: any[]): Promise<boolean> {
+export async function updateDocument(id: string, title: string | undefined, images: CanvasImage[]): Promise<boolean> {
   return wrapDatabaseOperation(async () => {
     const pool = getPool();
     

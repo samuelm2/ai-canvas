@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     } else {
       return NextResponse.json({ error: 'No images returned from API' }, { status: 500 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     const safeError = createSafeErrorResponse(error, 'Failed to generate image', 'POST /api/generate-image');
     return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }

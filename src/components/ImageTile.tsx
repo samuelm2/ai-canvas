@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import Draggable from 'react-draggable';
+import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
+import Image from 'next/image';
 import { CanvasImage } from '../types';
 
 interface ImageTileProps {
@@ -22,7 +23,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
   // Calculate if controls should be shown (hover OR selected) AND not dragging
   const showControls = (isHovered || image.selected) && !isDragging;
 
-  const handleDrag = (e: any, data: any) => {
+  const handleDrag = (e: DraggableEvent, data: DraggableData) => {
     onDrag(image.id, data.x, data.y);
   };
 
@@ -94,37 +95,45 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         
         {/* Image */}
         {image.displayState === 'ready' && image.src ? (
-          <img
-            src={image.src}
-            alt={image.prompt || 'Generated image'}
-            className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
-              isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
-            } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
-            draggable={false}
-            onDragStart={(e) => e.preventDefault()} // Prevent image drag
-            style={{ 
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              MozUserSelect: 'none',
-              msUserSelect: 'none',
-            }}
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={image.src}
+              alt={image.prompt || 'Generated image'}
+              fill
+              className={`object-cover rounded-lg transition-all duration-200 ${
+                isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
+              } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()} // Prevent image drag
+              style={{ 
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none',
+              }}
+              unoptimized
+            />
+          </div>
         ) : image.displayState === 'updating' && image.src ? (
-          <img
-            src={image.src}
-            alt={image.prompt || 'Generated image'}
-            className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
-              isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
-            } ${image.selected ? 'ring-4 ring-blue-500' : ''} opacity-60`}
-            draggable={false}
-            onDragStart={(e) => e.preventDefault()} // Prevent image drag
-            style={{ 
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              MozUserSelect: 'none',
-              msUserSelect: 'none',
-            }}
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={image.src}
+              alt={image.prompt || 'Generated image'}
+              fill
+              className={`object-cover rounded-lg transition-all duration-200 ${
+                isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
+              } ${image.selected ? 'ring-4 ring-blue-500' : ''} opacity-60`}
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()} // Prevent image drag
+              style={{ 
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none',
+              }}
+              unoptimized
+            />
+          </div>
         ) : (
           <div className={`w-full h-full bg-gray-200 rounded-lg flex items-center justify-center transition-transform duration-200 ${
             isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
