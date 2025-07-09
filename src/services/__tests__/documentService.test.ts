@@ -66,7 +66,6 @@ describe('DocumentService', () => {
       const mockResponse = {
         data: {
           documentId: 'doc123',
-          shareUrl: 'https://example.com/share/doc123',
         },
       };
       mockedAxios.post.mockResolvedValue(mockResponse);
@@ -88,7 +87,6 @@ describe('DocumentService', () => {
       expect(result).toEqual({
         success: true,
         documentId: 'doc123',
-        shareUrl: 'https://example.com/share/doc123',
       });
     });
 
@@ -96,7 +94,6 @@ describe('DocumentService', () => {
       const mockResponse = {
         data: {
           documentId: 'doc123',
-          shareUrl: 'https://example.com/share/doc123',
         },
       };
       mockedAxios.post.mockResolvedValue(mockResponse);
@@ -118,7 +115,6 @@ describe('DocumentService', () => {
       expect(result).toEqual({
         success: true,
         documentId: 'doc123',
-        shareUrl: 'https://example.com/share/doc123',
       });
     });
 
@@ -126,7 +122,6 @@ describe('DocumentService', () => {
       const mockResponse = {
         data: {
           documentId: 'doc123',
-          shareUrl: 'https://example.com/share/doc123',
         },
       };
       mockedAxios.post.mockResolvedValue(mockResponse);
@@ -148,7 +143,6 @@ describe('DocumentService', () => {
       expect(result).toEqual({
         success: true,
         documentId: 'doc123',
-        shareUrl: 'https://example.com/share/doc123',
       });
     });
 
@@ -291,7 +285,6 @@ describe('DocumentService', () => {
       expect(result).toEqual({
         success: true,
         documentId: 'doc123',
-        shareUrl: expect.stringContaining('doc123'),
       });
     });
 

@@ -31,7 +31,6 @@ export class DocumentService {
       return {
         success: true,
         documentId: response.data.documentId,
-        shareUrl: response.data.shareUrl,
       };
     } catch (error: unknown) {
       console.error('Error saving document:', error);
@@ -115,13 +114,9 @@ export class DocumentService {
         },
       });
 
-      // Generate the same share URL since document ID doesn't change
-      const shareUrl = this.generateShareUrl(documentId);
-
       return {
         success: true,
         documentId,
-        shareUrl,
       };
     } catch (error: unknown) {
       console.error('Error updating document:', error);

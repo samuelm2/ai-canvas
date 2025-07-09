@@ -25,15 +25,10 @@ export async function POST(request: NextRequest) {
 
     // Save document to database
     const documentId = await saveDocument(title, images);
-    
-    // Create shareable URL
-    const baseUrl = process.env.VERCEL_URL || 'http://localhost:3000';
-    const shareUrl = `${baseUrl}/?doc=${documentId}`;
 
     return NextResponse.json({
       success: true,
       documentId,
-      shareUrl,
     });
   } catch (error: unknown) {
     const safeError = createSafeErrorResponse(error, 'Failed to save document', 'POST /api/documents');
