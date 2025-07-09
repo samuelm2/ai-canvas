@@ -21,9 +21,9 @@ export default function ShareModal({ isOpen, onClose, shareUrl, onCopyUrl }: Sha
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 10000 }}>
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-200">
-        <h3 className="text-lg font-bold mb-4 text-gray-800">Canvas Saved Successfully! 🎉</h3>
+    <div className="modal-overlay" style={{ zIndex: 10000 }}>
+      <div className="modal-content">
+        <h3 className="header-title text-lg mb-4">Canvas Saved Successfully! 🎉</h3>
         <p className="text-gray-600 mb-4">
           Your canvas has been saved and can be shared with this link:
         </p>
@@ -33,17 +33,13 @@ export default function ShareModal({ isOpen, onClose, shareUrl, onCopyUrl }: Sha
         <div className="flex gap-2 justify-end">
           <button
             onClick={handleCopyUrl}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              copySuccess
-                ? 'bg-green-500 text-white'
-                : 'bg-blue-500 hover:bg-blue-600 text-white'
-            }`}
+            className={copySuccess ? 'btn-success' : 'btn-primary'}
           >
             {copySuccess ? '✅ Copied!' : '📋 Copy Link'}
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-medium bg-gray-500 hover:bg-gray-600 text-white"
+            className="btn-secondary"
           >
             Close
           </button>

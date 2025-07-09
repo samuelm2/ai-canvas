@@ -37,15 +37,18 @@ export default function FileMenu({
     setShowDropdown(false);
   };
 
+  const getButtonClass = () => {
+    if (fileMenuStatus === 'saved' || fileMenuStatus === 'copied') {
+      return 'btn-success flex items-center gap-2';
+    }
+    return 'btn-primary flex items-center gap-2';
+  };
+
   return (
     <div className="relative">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-          fileMenuStatus === 'saved' || fileMenuStatus === 'copied'
-            ? 'bg-green-500 text-white'
-            : 'bg-blue-500 hover:bg-blue-600 text-white'
-        }`}
+        className={getButtonClass()}
       >
         {fileMenuStatus === 'saving' ? '💾 Saving...' : 
          fileMenuStatus === 'savingNewCopy' ? '📄 Saving New Copy...' : 
@@ -56,15 +59,15 @@ export default function FileMenu({
       </button>
       
       {showDropdown && (
-        <div className="absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 min-w-48">
+        <div className="dropdown-menu">
           <button
             onClick={handleSave}
             disabled={imagesCount === 0 || (fileMenuStatus !== 'idle' && fileMenuStatus !== 'saved')}
-            className={`w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 rounded-t-lg ${
+            className={
               imagesCount === 0 || (fileMenuStatus !== 'idle' && fileMenuStatus !== 'saved')
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-gray-700'
-            }`}
+                ? 'dropdown-item-disabled rounded-t-lg'
+                : 'dropdown-item rounded-t-lg'
+            }
           >
             <span>💾</span>
             <span>{fileMenuStatus === 'saving' ? 'Saving...' : fileMenuStatus === 'saved' ? 'Saved!' : 'Save'}</span>
@@ -74,11 +77,11 @@ export default function FileMenu({
             <button
               onClick={handleSaveNewCopy}
               disabled={imagesCount === 0 || fileMenuStatus === 'savingNewCopy'}
-              className={`w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100 ${
+              className={
                 imagesCount === 0 || fileMenuStatus === 'savingNewCopy'
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-700'
-              }`}
+                  ? 'dropdown-item-disabled border-t border-gray-100'
+                  : 'dropdown-item border-t border-gray-100'
+              }
             >
               <span>📄</span>
               <span>{fileMenuStatus === 'savingNewCopy' ? 'Saving New Copy...' : 'Save New Copy'}</span>
@@ -88,7 +91,7 @@ export default function FileMenu({
           {shareUrl && (
             <button
               onClick={handleCopyShareUrl}
-              className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100 text-gray-700 rounded-b-lg"
+              className="dropdown-item border-t border-gray-100 rounded-b-lg"
             >
               <span>🔗</span>
               <span>Copy Link</span>

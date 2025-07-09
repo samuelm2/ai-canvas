@@ -112,7 +112,7 @@ export default function ImageCanvas() {
 
       {/* Error Display */}
       {error && (
-        <div className="absolute top-44 left-4 right-4 z-30 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+        <div className="absolute top-44 left-4 right-4 z-30 alert-error">
           <div className="flex justify-between items-center">
             <span>{error}</span>
             <button
@@ -138,7 +138,7 @@ export default function ImageCanvas() {
       />
 
       {/* Stats */}
-      <div className="absolute bottom-4 left-4 text-sm text-gray-600 bg-white px-3 py-1 rounded-full shadow">
+      <div className="absolute bottom-4 left-4 stats-badge">
         {images.length} image{images.length !== 1 ? 's' : ''} on canvas
       </div>
     </div>

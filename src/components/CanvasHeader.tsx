@@ -55,13 +55,15 @@ export default function CanvasHeader({
 
 
   return (
-    <div className="absolute top-0 left-0 right-0 z-20 bg-white shadow-sm p-4">
+    <div className="header absolute top-0 left-0 right-0 z-20">
       <div className="flex flex-col items-center gap-4">
         <div className="text-center flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-800">AI Image Canvas</h1>
+          <h1 className="header-title">AI Image Canvas</h1>
           {isLoadingDocument && (
             <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+              <div className="status-indicator">
+                <div className="loading-spinner"></div>
+              </div>
               <span className="text-sm text-gray-600">Loading...</span>
             </div>
           )}
@@ -98,22 +100,14 @@ export default function CanvasHeader({
           <button
             onClick={onOrganizeGrid}
             disabled={imagesCount === 0}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              imagesCount === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-purple-500 hover:bg-purple-600 text-white'
-            }`}
+            className={imagesCount === 0 ? 'btn-disabled' : 'btn-purple'}
           >
             📐 Organize Grid
           </button>
           <button
             onClick={onClearCanvas}
             disabled={imagesCount === 0}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              imagesCount === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-red-500 hover:bg-red-600 text-white'
-            }`}
+            className={imagesCount === 0 ? 'btn-disabled' : 'btn-danger'}
           >
             🗑️ Clear All
           </button>

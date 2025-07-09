@@ -1,15 +1,10 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,10 +20,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @layer base {
   html {
     @apply scroll-smooth;
@@ -36,6 +27,131 @@ body {
   
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  /* Button Variants */
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer bg-blue-500 text-white hover:bg-blue-600;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer bg-gray-500 text-white hover:bg-gray-600;
+  }
+  
+  .btn-danger {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer bg-red-500 text-white hover:bg-red-600;
+  }
+  
+  .btn-success {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer bg-green-500 text-white hover:bg-green-600;
+  }
+  
+  .btn-purple {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer bg-purple-500 text-white hover:bg-purple-600;
+  }
+  
+  .btn-disabled {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-not-allowed bg-gray-300 text-gray-500;
+  }
+  
+  /* Input Styles */
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900;
+  }
+  
+  /* Modal Styles */
+  .modal-overlay {
+    @apply fixed inset-0 flex items-center justify-center;
+  }
+  
+  .modal-content {
+    @apply bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-200;
+  }
+  
+  /* Dropdown Styles */
+  .dropdown-menu {
+    @apply absolute top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 min-w-48;
+  }
+  
+  .dropdown-item {
+    @apply w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700;
+  }
+  
+  .dropdown-item-disabled {
+    @apply w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-400 cursor-not-allowed;
+  }
+  
+  /* Card Styles */
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200;
+  }
+  
+  .card-header {
+    @apply p-4 border-b border-gray-200;
+  }
+  
+  .card-body {
+    @apply p-4;
+  }
+  
+  /* Status Indicators */
+  .status-indicator {
+    @apply bg-blue-500 bg-opacity-90 rounded-full p-1.5 shadow-lg;
+  }
+  
+  .loading-spinner {
+    @apply animate-spin rounded-full h-3 w-3 border-b-2 border-white;
+  }
+  
+  /* Control Buttons (small circular buttons) */
+  .control-btn-primary {
+    @apply rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors bg-blue-500 text-white hover:bg-blue-600;
+  }
+  
+  .control-btn-danger {
+    @apply rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors bg-red-500 text-white hover:bg-red-600;
+  }
+  
+  .control-btn-success {
+    @apply rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors bg-green-500 text-white hover:bg-green-600;
+  }
+  
+  .control-btn-purple {
+    @apply rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors bg-purple-500 text-white hover:bg-purple-600;
+  }
+  
+  /* Error/Alert Styles */
+  .alert-error {
+    @apply px-4 py-3 rounded-lg border bg-red-100 border-red-400 text-red-700;
+  }
+  
+  .alert-success {
+    @apply px-4 py-3 rounded-lg border bg-green-100 border-green-400 text-green-700;
+  }
+  
+  .alert-info {
+    @apply px-4 py-3 rounded-lg border bg-blue-100 border-blue-400 text-blue-700;
+  }
+  
+  /* Stats Display */
+  .stats-badge {
+    @apply text-sm text-gray-600 bg-white px-3 py-1 rounded-full shadow;
+  }
+  
+  /* Header Styles */
+  .header {
+    @apply bg-white shadow-sm p-4;
+  }
+  
+  .header-title {
+    @apply text-2xl font-bold text-gray-800;
+  }
+  
+  /* Tooltip Styles */
+  .tooltip {
+    @apply bg-black bg-opacity-75 text-white text-xs p-2 rounded-b-lg;
   }
 }
 

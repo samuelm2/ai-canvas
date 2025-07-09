@@ -148,8 +148,8 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         {/* Small corner loading indicator */}
         {(image.displayState === 'loading' || image.displayState === 'updating') && (
           <div className="absolute top-2 left-2 z-30">
-            <div className="bg-blue-500 bg-opacity-90 rounded-full p-1.5 shadow-lg">
-              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+            <div className="status-indicator">
+              <div className="loading-spinner"></div>
             </div>
           </div>
         )}
@@ -160,7 +160,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
             <button
               onClick={handleExpand}
               onMouseDown={(e) => e.stopPropagation()} // Prevent interference with drag
-              className="bg-purple-500 hover:bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors"
+              className="control-btn-purple"
               title="Expand into 4 variations"
             >
               !
@@ -168,7 +168,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
             <button
               onClick={handleDuplicate}
               onMouseDown={(e) => e.stopPropagation()} // Prevent interference with drag
-              className="bg-green-500 hover:bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors"
+              className="control-btn-success"
               title="Duplicate image"
             >
               ⧉
@@ -176,7 +176,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
             <button
               onClick={handleDelete}
               onMouseDown={(e) => e.stopPropagation()} // Prevent interference with drag
-              className="bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg transition-colors"
+              className="control-btn-danger"
               title="Delete image"
             >
               ×
@@ -186,7 +186,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         
         {/* Prompt tooltip */}
         {image.prompt && showControls && (
-          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-2 rounded-b-lg">
+          <div className="tooltip absolute bottom-0 left-0 right-0">
             {image.prompt}
           </div>
         )}
