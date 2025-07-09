@@ -192,16 +192,21 @@ export function useImageOperations(props: UseImageOperationsProps) {
         return;
       }
       
-      const results = await Promise.allSettled(placeholderImages.map(async (placeholderImage, index) => {
+      // Generate variations for each placeholder
+      await Promise.allSettled(placeholderImages.map(async (placeholderImage, index) => {
         const actualPrompt = variationsResult.variations![index];
         updateImage(placeholderImage.id, { prompt: actualPrompt });
         await generateImageForTile(placeholderImage.id, actualPrompt);
       }));
       
-      // Check if any failed and show appropriate error
-      const failedCount = results.filter(result => result.status === 'rejected').length;
-      if (failedCount > 0) {
-        setError(`Failed to generate ${failedCount} of 4 variations`);
+      // Check which tiles failed by looking at their final state
+      const failedTiles = placeholderImages.filter(placeholderImage => {
+        const currentTile = imagesRef.current.find(img => img.id === placeholderImage.id);
+        return currentTile?.displayState === 'failed';
+      });
+      
+      if (failedTiles.length > 0) {
+        setError(`Failed to generate ${failedTiles.length} of 4 variations`);
       }
       
     } catch (error) {
@@ -231,7 +236,8 @@ export function useImageOperations(props: UseImageOperationsProps) {
     addImage(newImage);
     selectImage(newImageId);
     
-    await generateImageForTile(newImageId, prompt);
+    // Fire-and-forget: generateImageForTile handles its own errors and state updates
+    generateImageForTile(newImageId, prompt);
   }, [addImage, selectImage, generateImageForTile]);
 
   // Update selected tile
@@ -245,7 +251,8 @@ export function useImageOperations(props: UseImageOperationsProps) {
       displayState: 'updating' 
     });
     
-    await generateImageForTile(selectedImageId, prompt);
+    // Fire-and-forget: generateImageForTile handles its own errors and state updates
+    generateImageForTile(selectedImageId, prompt);
   }, [selectedImageId, cancelActiveRequest, updateImage, generateImageForTile]);
 
   return {

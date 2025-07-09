@@ -62,14 +62,14 @@ export function useImageGeneration({ updateImage, setError }: UseImageGeneration
         }
       } else if (result.error !== 'Request cancelled') {
         setError(result.error || 'Failed to generate image');
-        updateImage(tileId, { displayState: 'ready' });
+        updateImage(tileId, { displayState: 'failed' });
       }
     } catch (err: unknown) {
       activeRequestsRef.current.delete(tileId);
       
       if (err instanceof Error && err.name !== 'AbortError') {
         setError('Network error occurred');
-        updateImage(tileId, { displayState: 'ready' });
+        updateImage(tileId, { displayState: 'failed' });
       }
     }
   }, [updateImage, setError, cancelActiveRequest]);
