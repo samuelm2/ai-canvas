@@ -21,6 +21,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
+    // DEV: Simulate 429 error for testing (remove this in production)
+    if (process.env.NODE_ENV === 'development' && Math.random() < 0.3) {
+      console.log('🧪 DEV: Simulating 429 rate limit error');
+      return NextResponse.json({ error: 'Rate limit exceeded. Please try again later.' }, { status: 429 });
+    }
+
     const apiKey = process.env.FAI_API_KEY; // No NEXT_PUBLIC_ prefix!
     
     if (!apiKey) {
