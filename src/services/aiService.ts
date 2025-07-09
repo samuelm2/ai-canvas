@@ -1,5 +1,6 @@
 import axios, { isAxiosError } from 'axios';
 import { AIImageResponse, PromptVariationsResponse } from '../types';
+import { extractErrorMessage } from '../utils/errorUtils';
 
 export class AIService {
   static async generateImage(prompt: string, abortSignal?: AbortSignal): Promise<AIImageResponse> {
@@ -38,12 +39,7 @@ export class AIService {
       
       console.error('Error generating image:', error);
       
-      let errorMessage = 'Failed to generate image';
-      if (isAxiosError(error) && error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage = extractErrorMessage(error, 'Failed to generate image');
 
       return {
         success: false,
@@ -88,10 +84,7 @@ export class AIService {
       
       console.error('Error generating prompt variations:', error);
       
-      let errorMessage = 'Failed to generate variations';
-      if (isAxiosError(error) && error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      }
+      const errorMessage = extractErrorMessage(error, 'Failed to generate variations');
       
       return {
         success: false,

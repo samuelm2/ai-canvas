@@ -115,6 +115,16 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
               unoptimized
             />
           </div>
+        ) : image.displayState === 'failed' ? (
+          <div className={`w-full h-full bg-gray-200 rounded-lg flex items-center justify-center transition-transform duration-200 ${
+            isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
+          } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}>
+            <div className="text-center text-gray-500">
+              <div className="text-3xl mb-2">⚠️</div>
+              <p className="text-xs font-medium">Failed to load</p>
+              <p className="text-xs mt-1">Image not available</p>
+            </div>
+          </div>
         ) : image.displayState === 'updating' && image.src ? (
           <div className="relative w-full h-full">
             <Image
