@@ -1,6 +1,6 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
 import { DocumentService } from '../services/documentService';
-import { CanvasImage, FileMenuStatus } from '../types';
+import { CanvasImage, FileMenuStatus, SerializedImage } from '../types';
 
 interface UseDocumentOperationsProps {
   images: CanvasImage[];
@@ -91,7 +91,7 @@ export function useDocumentOperations({
       setFileMenuStatus('idle');
       return null;
     }
-  }, [images, lastSavedDocumentId, setError]);
+  }, [images, lastSavedDocumentId, setError, fileMenuStatus]);
 
   // Load a document by ID
   const loadDocument = useCallback(async (documentId: string) => {
@@ -110,7 +110,7 @@ export function useDocumentOperations({
         setImages(deserializedImages);
         
         // Preload all images and update their loading states
-        result.document.images.forEach(async (originalImage: any, index: number) => {
+        result.document.images.forEach(async (originalImage: SerializedImage, index: number) => {
           const deserializedImage = deserializedImages[index];
           if (originalImage.src) {
             try {

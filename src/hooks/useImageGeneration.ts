@@ -63,10 +63,10 @@ export function useImageGeneration({ updateImage, setError }: UseImageGeneration
         setError(result.error || 'Failed to generate image');
         updateImage(tileId, { displayState: 'ready' });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       activeRequestsRef.current.delete(tileId);
       
-      if (err.name !== 'AbortError') {
+      if (err instanceof Error && err.name !== 'AbortError') {
         setError('Network error occurred');
         updateImage(tileId, { displayState: 'ready' });
       }

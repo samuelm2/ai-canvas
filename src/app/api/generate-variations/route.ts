@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
       success: true,
       variations,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const safeError = createSafeErrorResponse(error, 'Failed to generate variations', 'POST /api/generate-variations');
     return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }

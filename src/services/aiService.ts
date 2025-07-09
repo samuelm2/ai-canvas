@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AIImageResponse } from '../types';
+import { AIImageResponse, AxiosErrorResponse, AIPromptVariationsResponse } from '../types';
 
 export class AIService {
   static async generateImage(prompt: string, abortSignal?: AbortSignal): Promise<AIImageResponse> {
@@ -24,9 +24,9 @@ export class AIService {
         success: true,
         imageUrl: response.data.imageUrl,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle cancellation gracefully
-      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+      if (error instanceof Error && (error.name === 'AbortError' || (error as any).code === 'ERR_CANCELED')) {
         return {
           success: false,
           error: 'Request cancelled',
@@ -36,10 +36,13 @@ export class AIService {
       console.error('Error generating image:', error);
       
       let errorMessage = 'Failed to generate image';
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.message) {
-        errorMessage = error.message;
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as AxiosErrorResponse;
+        if (axiosError.response?.data?.error) {
+          errorMessage = axiosError.response.data.error;
+        } else if (axiosError.message) {
+          errorMessage = axiosError.message;
+        }
       }
 
       return {
@@ -50,7 +53,7 @@ export class AIService {
   }
 
   // Generate 4 prompt variations using our secure API route
-  static async generatePromptVariations(originalPrompt: string, abortSignal?: AbortSignal): Promise<{ success: boolean; variations?: string[]; error?: string }> {
+  static async generatePromptVariations(originalPrompt: string, abortSignal?: AbortSignal): Promise<AIPromptVariationsResponse> {
     try {
       if (!originalPrompt || originalPrompt.trim() === '') {
         throw new Error('Original prompt is required and cannot be empty');
@@ -72,8 +75,8 @@ export class AIService {
         success: true,
         variations: response.data.variations,
       };
-    } catch (error: any) {
-      if (error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+    } catch (error: unknown) {
+      if (error instanceof Error && (error.name === 'AbortError' || (error as any).code === 'ERR_CANCELED')) {
         return {
           success: false,
           error: 'Request cancelled',
@@ -82,9 +85,17 @@ export class AIService {
       
       console.error('Error generating prompt variations:', error);
       
+      let errorMessage = 'Failed to generate variations';
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as AxiosErrorResponse;
+        if (axiosError.response?.data?.error) {
+          errorMessage = axiosError.response.data.error;
+        }
+      }
+      
       return {
         success: false,
-        error: error.response?.data?.error || 'Failed to generate variations',
+        error: errorMessage,
       };
     }
   }

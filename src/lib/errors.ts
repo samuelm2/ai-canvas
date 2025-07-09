@@ -16,7 +16,7 @@ export interface ApiErrorResponse {
   path?: string;
 }
 
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown> {
   success: true;
   data?: T;
 }

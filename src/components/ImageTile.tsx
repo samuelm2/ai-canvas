@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import Draggable from 'react-draggable';
 import { CanvasImage } from '../types';
 
@@ -81,6 +82,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
           WebkitUserSelect: 'none',
           MozUserSelect: 'none',
           msUserSelect: 'none',
+          position: 'relative',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -94,10 +96,11 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         
         {/* Image */}
         {image.displayState === 'ready' && image.src ? (
-          <img
+          <Image
             src={image.src}
             alt={image.prompt || 'Generated image'}
-            className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
+            fill
+            className={`object-cover rounded-lg transition-all duration-200 ${
               isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
             } ${image.selected ? 'ring-4 ring-blue-500' : ''}`}
             draggable={false}
@@ -110,10 +113,11 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
             }}
           />
         ) : image.displayState === 'updating' && image.src ? (
-          <img
+          <Image
             src={image.src}
             alt={image.prompt || 'Generated image'}
-            className={`w-full h-full object-cover rounded-lg transition-all duration-200 ${
+            fill
+            className={`object-cover rounded-lg transition-all duration-200 ${
               isDragging ? 'scale-105 shadow-2xl' : 'hover:scale-102'
             } ${image.selected ? 'ring-4 ring-blue-500' : ''} opacity-60`}
             draggable={false}

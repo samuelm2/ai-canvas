@@ -13,6 +13,37 @@ export interface CanvasImage {
   zIndex?: number;
 }
 
+// Serialized image for database storage (without UI-specific properties)
+export interface SerializedImage {
+  id: string;
+  src: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  prompt?: string;
+  zIndex?: number;
+}
+
+// Database document structure (with string timestamps)
+export interface DatabaseDocument {
+  id: string;
+  title: string;
+  images: SerializedImage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Common axios error structure
+export interface AxiosErrorResponse {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
+  message?: string;
+}
+
 export interface GridConfig {
   gap: number;
   startX: number;
@@ -22,6 +53,12 @@ export interface GridConfig {
 export interface AIImageResponse {
   success: boolean;
   imageUrl?: string;
+  error?: string;
+}
+
+export interface AIPromptVariationsResponse {
+  success: boolean;
+  variations?: string[];
   error?: string;
 }
 
@@ -35,7 +72,7 @@ export interface CanvasDocument {
 
 export interface SaveDocumentRequest {
   title?: string;
-  images: CanvasImage[];
+  images: SerializedImage[];
 }
 
 export interface SaveDocumentResponse {
@@ -47,7 +84,7 @@ export interface SaveDocumentResponse {
 
 export interface LoadDocumentResponse {
   success: boolean;
-  document?: CanvasDocument;
+  document?: DatabaseDocument;
   error?: string;
 }
 

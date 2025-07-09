@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { CanvasImage } from '../types';
+import { CanvasImage, AIPromptVariationsResponse } from '../types';
 
 // Grid layout constants
 const GRID_GAP = 20;
@@ -16,7 +16,7 @@ interface UseImageOperationsProps {
   addImage: (image: CanvasImage) => void;
   setError: (error: string | null) => void;
   generateImageForTile: (tileId: string, prompt: string) => Promise<void>;
-  generatePromptVariations: (prompt: string) => Promise<any>;
+  generatePromptVariations: (prompt: string) => Promise<AIPromptVariationsResponse>;
   cancelActiveRequest: (tileId: string) => void;
 }
 
@@ -91,7 +91,7 @@ export function useImageOperations(props: UseImageOperationsProps) {
     if (selectedImg?.prompt) {
       setCurrentPrompt(selectedImg.prompt);
     }
-  }, [selectImage, setCurrentPrompt, updateImage]);
+  }, [selectImage, setCurrentPrompt, updateImage, getSmartZIndex]);
 
   // Handle canvas click (deselection)
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
