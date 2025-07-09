@@ -56,8 +56,9 @@ export function useImageGeneration({ updateImage, setError }: UseImageGeneration
             displayState: 'ready' 
           });
         } catch {
-          setError('Failed to load image');
-          updateImage(tileId, { displayState: 'ready' });
+          updateImage(tileId, { 
+            displayState: 'failed'
+          });
         }
       } else if (result.error !== 'Request cancelled') {
         setError(result.error || 'Failed to generate image');

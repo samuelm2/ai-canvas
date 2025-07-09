@@ -124,7 +124,9 @@ export function useDocumentOperations({
               });
             } catch (error) {
               console.error('Failed to preload image:', error);
-              updateImage(deserializedImage.id, { displayState: 'ready' });
+              updateImage(deserializedImage.id, { 
+                displayState: 'failed'
+              });
             }
           }
         }));

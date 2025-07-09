@@ -1,4 +1,4 @@
-export type ImageDisplayState = 'loading' | 'updating' | 'ready';
+export type ImageDisplayState = 'loading' | 'updating' | 'ready' | 'failed';
 
 export interface CanvasImage {
   id: string;
@@ -46,7 +46,7 @@ export interface CanvasDocument {
 
 export interface SaveDocumentRequest {
   title?: string;
-  images: CanvasImage[];
+  images: SerializedCanvasImage[];
 }
 
 export interface SaveDocumentResponse {
