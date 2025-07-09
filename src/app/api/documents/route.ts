@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       documentId,
       shareUrl,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const safeError = createSafeErrorResponse(error, 'Failed to save document', 'POST /api/documents');
     return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }

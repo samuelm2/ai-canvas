@@ -26,7 +26,7 @@ export async function GET(
       success: true,
       document,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const safeError = createSafeErrorResponse(error, 'Failed to load document', `GET /api/documents/${await params.then(p => p.id)}`);
     return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }
@@ -71,7 +71,7 @@ export async function PUT(
       success: true,
       documentId: id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const safeError = createSafeErrorResponse(error, 'Failed to update document', `PUT /api/documents/${await params.then(p => p.id)}`);
     return NextResponse.json({ error: safeError.error }, { status: safeError.statusCode });
   }
