@@ -186,7 +186,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         )}
         
         {/* Prompt tooltip */}
-        {image.prompt && showControls && (
+        {image.prompt && image.selected && !isDragging && (
           <div className="absolute top-full left-0 mt-2 z-10 max-w-64">
             <div className="tooltip whitespace-normal" style={{ width: 'max-content', maxWidth: '100%' }}>
               {image.prompt}
