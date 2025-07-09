@@ -103,7 +103,8 @@ export default function FileMenu({
       {/* Click outside to close dropdown */}
       {showDropdown && (
         <div
-          className="fixed inset-0 z-20"
+          className="fixed inset-0"
+          style={{ zIndex: 'var(--z-dropdown-bg)' }}
           onClick={() => setShowDropdown(false)}
         />
       )}

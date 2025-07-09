@@ -21,7 +21,7 @@ export default function ShareModal({ isOpen, onClose, shareUrl, onCopyUrl }: Sha
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" style={{ zIndex: 10000 }}>
+    <div className="modal-overlay">
       <div className="modal-content">
         <h3 className="header-title text-lg mb-4">Canvas Saved Successfully! 🎉</h3>
         <p className="text-gray-600 mb-4">

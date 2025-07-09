@@ -74,7 +74,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         style={{ 
           width: image.width, 
           height: image.height,
-          zIndex: isDragging ? 9999 : (image.zIndex || 1),
+          zIndex: isDragging ? 'var(--z-dragged-image)' : Math.min(image.zIndex || 1, 999),
           // Only add transition during grid organization, not during normal dragging
           transition: isOrganizing ? 'transform 0.5s ease-out' : 'none',
           // Prevent text/image selection
@@ -89,7 +89,8 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
       >
         {/* Drag Handle */}
         <div 
-          className="drag-handle absolute inset-0 cursor-move z-20" 
+          className="drag-handle absolute inset-0 cursor-move" 
+          style={{ zIndex: 'var(--z-drag-handle)' }}
           title="Drag to move"
         />
         
@@ -147,7 +148,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         
         {/* Small corner loading indicator */}
         {(image.displayState === 'loading' || image.displayState === 'updating') && (
-          <div className="absolute top-2 left-2 z-30">
+          <div className="absolute top-2 left-2" style={{ zIndex: 'var(--z-image-controls)' }}>
             <div className="status-indicator">
               <div className="loading-spinner"></div>
             </div>
@@ -156,7 +157,7 @@ export default function ImageTile({ image, onDrag, onDelete, onSelect, onDuplica
         
         {/* Controls */}
         {showControls && (
-          <div className="absolute -top-2 -right-2 flex gap-1 z-30">
+          <div className="absolute -top-2 -right-2 flex gap-1" style={{ zIndex: 'var(--z-image-controls)' }}>
             <button
               onClick={handleExpand}
               onMouseDown={(e) => e.stopPropagation()} // Prevent interference with drag

@@ -112,7 +112,7 @@ export default function ImageCanvas() {
 
       {/* Error Display */}
       {error && (
-        <div className="absolute top-44 left-4 right-4 z-30 alert-error">
+        <div className="absolute top-44 left-4 right-4 alert-error" style={{ zIndex: 'var(--z-alerts)' }}>
           <div className="flex justify-between items-center">
             <span>{error}</span>
             <button

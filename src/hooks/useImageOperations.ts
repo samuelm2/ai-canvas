@@ -44,7 +44,8 @@ export function useImageOperations(props: UseImageOperationsProps) {
   const generateId = () => `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
   // Smart z-index management with normalization
-  const MAX_Z_INDEX = 1000;
+  // This should match --z-image-max from CSS (999)
+  const MAX_Z_INDEX = 999;
   
   const normalizeZIndexes = useCallback(() => {
     // Re-number all images from 1 to N based on current z-order

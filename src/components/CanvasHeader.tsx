@@ -55,7 +55,7 @@ export default function CanvasHeader({
 
 
   return (
-    <div className="header absolute top-0 left-0 right-0 z-20">
+    <div className="header absolute top-0 left-0 right-0" style={{ zIndex: 'var(--z-header)' }}>
       <div className="flex flex-col items-center gap-4">
         <div className="text-center flex items-center gap-3">
           <h1 className="header-title">AI Image Canvas</h1>
