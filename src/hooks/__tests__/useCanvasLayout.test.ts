@@ -99,7 +99,7 @@ describe('useCanvasLayout', () => {
     });
 
     it('should wrap to next row when exceeding available width', () => {
-      // Set narrower window width to force wrapping
+      // Set narrower window width to force wrapping (mobile size: 128px)
       Object.defineProperty(window, 'innerWidth', {
         value: 700,
       });
@@ -118,21 +118,21 @@ describe('useCanvasLayout', () => {
         },
         {
           ...mockImage2,
-          x: 326, // First row, second column
+          x: 198, // First row, second column (50 + 128 + 20)
           y: 50,
         },
         {
           ...mockImage3,
-          x: 50, // Second row, first column
-          y: 326, // GRID_START_Y + 1 * (256 + 20)
+          x: 346, // First row, third column (50 + 2 * (128 + 20))
+          y: 50,
         },
       ]);
     });
 
     it('should handle single column layout on very narrow screens', () => {
-      // Set very narrow window width
+      // Set very narrow window width to force single column (mobile size: 128px)
       Object.defineProperty(window, 'innerWidth', {
-        value: 400,
+        value: 240,
       });
 
       const { result } = renderHook(() => useCanvasLayout(mockProps));
@@ -150,12 +150,12 @@ describe('useCanvasLayout', () => {
         {
           ...mockImage2,
           x: 50, // Second row
-          y: 326,
+          y: 198, // GRID_START_Y + 1 * (128 + 20)
         },
         {
           ...mockImage3,
           x: 50, // Third row
-          y: 602,
+          y: 346, // GRID_START_Y + 2 * (128 + 20)
         },
       ]);
     });
@@ -297,7 +297,7 @@ describe('useCanvasLayout', () => {
     });
 
     it('should ensure at least one column even on very narrow screens', () => {
-      // Test with extremely narrow width
+      // Test with extremely narrow width (mobile size: 128px)
       Object.defineProperty(window, 'innerWidth', { value: 200 });
       
       const { result } = renderHook(() => useCanvasLayout(mockProps));
@@ -312,10 +312,10 @@ describe('useCanvasLayout', () => {
       expect(firstCallArgs[1].x).toBe(50);   // Column 0 (wrapped)
       expect(firstCallArgs[2].x).toBe(50);   // Column 0 (wrapped)
       
-      // Check y positions for wrapping
+      // Check y positions for wrapping (mobile size: 128px)
       expect(firstCallArgs[0].y).toBe(50);   // Row 0
-      expect(firstCallArgs[1].y).toBe(326);  // Row 1
-      expect(firstCallArgs[2].y).toBe(602);  // Row 2
+      expect(firstCallArgs[1].y).toBe(198);  // Row 1 (50 + 128 + 20)
+      expect(firstCallArgs[2].y).toBe(346);  // Row 2 (50 + 2 * (128 + 20))
     });
   });
 }); 
