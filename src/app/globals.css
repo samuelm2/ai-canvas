@@ -182,6 +182,11 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
   }
+  
+  /* Custom max-width for mobile tooltip to match 128px image size */
+  .max-w-32 {
+    max-width: 8rem; /* 128px */
+  }
 }
 
 /* Custom scrollbar */

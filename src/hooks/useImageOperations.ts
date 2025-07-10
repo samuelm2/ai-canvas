@@ -4,6 +4,12 @@ import { CanvasImage, PromptVariationsResponse } from '../types';
 // Grid layout constants
 const GRID_GAP = 20;
 const STANDARD_IMAGE_SIZE = 256;
+const MOBILE_IMAGE_SIZE = 128; // Even smaller size for mobile
+
+// Utility function to get image size based on screen width
+const getImageSize = (windowWidth: number): number => {
+  return windowWidth <= 768 ? MOBILE_IMAGE_SIZE : STANDARD_IMAGE_SIZE;
+};
 
 interface UseImageOperationsProps {
   images: CanvasImage[];
@@ -145,8 +151,9 @@ export function useImageOperations(props: UseImageOperationsProps) {
       img.id === id ? { ...img, zIndex: expandedImageZ } : img
     );
     
-    const crossSpacing = STANDARD_IMAGE_SIZE + GRID_GAP * 2;
-    const negativeThreshold = STANDARD_IMAGE_SIZE * 0.3;
+    const imageSize = getImageSize(window.innerWidth);
+    const crossSpacing = imageSize + GRID_GAP * 2;
+    const negativeThreshold = imageSize * 0.3;
     
     const placeholderImages: CanvasImage[] = Array.from({ length: 4 }, (_, index) => {
       let offsetX = 0;
@@ -172,8 +179,8 @@ export function useImageOperations(props: UseImageOperationsProps) {
         src: '',
         x: imageToExpand.x + offsetX,
         y: imageToExpand.y + offsetY,
-        width: STANDARD_IMAGE_SIZE,
-        height: STANDARD_IMAGE_SIZE,
+        width: imageSize,
+        height: imageSize,
         prompt: `${imageToExpand.prompt} (generating variation...)`,
         selected: false,
         displayState: 'loading',
@@ -219,14 +226,15 @@ export function useImageOperations(props: UseImageOperationsProps) {
   // Create a new tile
   const createNewTile = useCallback(async (prompt: string) => {
     const newImageId = generateId();
+    const imageSize = getImageSize(window.innerWidth);
     
     const newImage: CanvasImage = {
       id: newImageId,
       src: '',
-      x: 100 + Math.random() * 200,
-      y: 200 + Math.random() * 200,
-      width: 256,
-      height: 256,
+      x: 50, // Top-left position
+      y: 50, // Top-left position
+      width: imageSize,
+      height: imageSize,
       prompt,
       selected: true,
       displayState: 'loading',

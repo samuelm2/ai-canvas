@@ -197,7 +197,7 @@ function ImageTile({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, i
         
         {/* Prompt tooltip */}
         {image.prompt && image.selected && (
-          <div className="absolute top-full left-0 mt-2 z-10 max-w-64">
+          <div className="absolute top-full left-0 mt-2 z-10 max-w-32 md:max-w-64">
             <div className="tooltip whitespace-normal" style={{ width: 'max-content', maxWidth: '100%' }}>
               {image.prompt}
             </div>
