@@ -4,6 +4,35 @@ import { useImageOperations } from './useImageOperations';
 import { useCanvasLayout } from './useCanvasLayout';
 import { useDocumentOperations } from './useDocumentOperations';
 
+/**
+ * useImageCanvas - Main hook that orchestrates all canvas functionality
+ * 
+ * @returns {Object} Complete canvas state and operations
+ * 
+ * @description The primary hook that combines all canvas-related hooks into a single
+ * interface. It provides a comprehensive API for managing the AI image canvas,
+ * including state management, image operations, layout management, and document
+ * persistence. This hook serves as the central coordination point for all canvas
+ * functionality.
+ * 
+ * @example
+ * const {
+ *   // State
+ *   images, selectedImage, currentPrompt, error,
+ *   // Operations
+ *   createNewTile, updateSelectedTile, organizeInGrid,
+ *   // Document operations
+ *   saveDocument, loadDocument, copyShareUrl
+ * } = useImageCanvas();
+ * 
+ * @returns {Object} Object containing:
+ * - **State**: images, selectedImage, currentPrompt, isOrganizing, error
+ * - **State setters**: setCurrentPrompt, setErrorModal
+ * - **Image operations**: createNewTile, updateSelectedTile, handleImageDrag, handleImageSelect, handleCanvasClick, handleImageDelete, handleImageDuplicate, handleImageExpand
+ * - **Canvas operations**: organizeInGrid, clearCanvas, dismissError
+ * - **Document operations**: saveDocument, loadDocument, copyShareUrl, fileMenuStatus, shareUrl
+ * - **Cleanup**: cleanup function for proper resource management
+ */
 export function useImageCanvas() {
   // Get base state management
   const canvasState = useCanvasState();

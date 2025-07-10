@@ -6,7 +6,23 @@ import ShareModal from './ShareModal';
 import FileMenu from './FileMenu';
 import { CanvasImage, FileMenuStatus } from '../types';
 
-
+/**
+ * Props for the CanvasHeader component
+ * 
+ * @interface CanvasHeaderProps
+ * @property {string} currentPrompt - The current prompt text in the input field
+ * @property {function} onPromptChange - Callback for when the prompt changes
+ * @property {CanvasImage | undefined} selectedImage - Currently selected image tile
+ * @property {function} onOrganizeGrid - Callback to organize images in a grid layout
+ * @property {function} onClearCanvas - Callback to clear all images from canvas
+ * @property {number} imagesCount - Total number of images on the canvas
+ * @property {function} onSaveDocument - Callback to save the current canvas as a document
+ * @property {function} onCopyShareUrl - Callback to copy the share URL to clipboard
+ * @property {FileMenuStatus} fileMenuStatus - Current status of file operations
+ * @property {string | null} shareUrl - URL for sharing the saved document
+ * @property {string | null} lastSavedDocumentId - ID of the last saved document
+ * @property {boolean} isLoadingDocument - Whether a document is currently being loaded
+ */
 interface CanvasHeaderProps {
   currentPrompt: string;
   onPromptChange: (prompt: string) => void;
@@ -22,6 +38,36 @@ interface CanvasHeaderProps {
   isLoadingDocument: boolean;
 }
 
+/**
+ * CanvasHeader - Header component with prompt input, controls, and file operations
+ * 
+ * @param {CanvasHeaderProps} props - Component props
+ * @returns {JSX.Element} The header section with input field and action buttons
+ * 
+ * @description The header component that contains the main prompt input field,
+ * canvas control buttons, and file operations menu. It provides the primary
+ * interface for users to interact with the canvas, including:
+ * - Live prompt input for image generation
+ * - Canvas organization and clearing tools
+ * - Document saving and sharing functionality
+ * - Visual feedback for ongoing operations
+ * 
+ * @example
+ * <CanvasHeader
+ *   currentPrompt="A beautiful landscape"
+ *   onPromptChange={(prompt) => console.log(prompt)}
+ *   selectedImage={selectedImage}
+ *   onOrganizeGrid={() => organizeImages()}
+ *   onClearCanvas={() => clearAllImages()}
+ *   imagesCount={5}
+ *   onSaveDocument={saveDocument}
+ *   onCopyShareUrl={copyUrl}
+ *   fileMenuStatus="idle"
+ *   shareUrl="https://example.com/canvas/123"
+ *   lastSavedDocumentId="doc-123"
+ *   isLoadingDocument={false}
+ * />
+ */
 export default function CanvasHeader({
   currentPrompt,
   onPromptChange,

@@ -14,6 +14,17 @@ const getImageSize = (windowWidth: number): number => {
   return windowWidth <= 768 ? MOBILE_IMAGE_SIZE : STANDARD_IMAGE_SIZE;
 };
 
+/**
+ * Props for the useCanvasLayout hook
+ * 
+ * @interface UseCanvasLayoutProps
+ * @property {CanvasImage[]} images - Array of canvas images to manage
+ * @property {function} setImages - Function to update the images array
+ * @property {function} setIsOrganizing - Function to set the organizing state
+ * @property {function} clearAll - Function to clear all canvas state
+ * @property {function} cleanup - Function to cleanup resources
+ * @property {function} resetDocumentState - Function to reset document state
+ */
 interface UseCanvasLayoutProps {
   images: CanvasImage[];
   setImages: (images: CanvasImage[]) => void;
@@ -23,6 +34,30 @@ interface UseCanvasLayoutProps {
   resetDocumentState: () => void;
 }
 
+/**
+ * useCanvasLayout - Hook for managing canvas layout and organization
+ * 
+ * @param {UseCanvasLayoutProps} props - Hook configuration
+ * @returns {Object} Layout management functions
+ * 
+ * @description Provides functionality for organizing and managing the layout
+ * of images on the canvas. Handles grid organization with responsive sizing
+ * and canvas clearing with proper cleanup.
+ * 
+ * @example
+ * const { organizeInGrid, clearCanvas } = useCanvasLayout({
+ *   images,
+ *   setImages,
+ *   setIsOrganizing,
+ *   clearAll,
+ *   cleanup,
+ *   resetDocumentState
+ * });
+ * 
+ * @returns {Object} Object containing:
+ * - **organizeInGrid**: Function to arrange images in a responsive grid layout
+ * - **clearCanvas**: Function to clear the canvas with proper cleanup
+ */
 export function useCanvasLayout({ 
   images, 
   setImages, 

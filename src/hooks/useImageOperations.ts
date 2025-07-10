@@ -26,6 +26,68 @@ interface UseImageOperationsProps {
   cancelActiveRequest: (tileId: string) => void;
 }
 
+/**
+ * Custom hook for managing canvas image operations and interactions.
+ * 
+ * This hook provides a comprehensive set of operations for managing images on a canvas,
+ * including positioning, selection, z-index management, duplication, expansion into variations,
+ * and tile creation/updating. It handles both user interactions and automated operations
+ * like generating image variations.
+ * 
+ * Key features:
+ * - Smart z-index management with normalization to prevent overflow
+ * - Responsive image sizing based on screen width
+ * - Image expansion into 4 variations with intelligent positioning
+ * - Drag and drop functionality
+ * - Selection and deselection handling
+ * - Tile creation and updating with loading states
+ * 
+ * @param props - Configuration object containing image state and operations
+ * @param props.images - Array of canvas images currently displayed
+ * @param props.selectedImageId - ID of the currently selected image, null if none selected
+ * @param props.updateImage - Function to update a specific image's properties
+ * @param props.deleteImage - Function to remove an image from the canvas
+ * @param props.selectImage - Function to select/deselect an image
+ * @param props.setCurrentPrompt - Function to update the current prompt input
+ * @param props.setImages - Function to replace the entire images array
+ * @param props.addImage - Function to add a new image to the canvas
+ * @param props.setError - Function to set error messages for user feedback
+ * @param props.generateImageForTile - Function to generate an image for a specific tile
+ * @param props.generatePromptVariations - Function to generate prompt variations for image expansion
+ * @param props.cancelActiveRequest - Function to cancel ongoing image generation requests
+ * 
+ * @returns Object containing handler functions for various image operations
+ * @returns returns.handleImageDrag - Handler for image drag operations (id, x, y)
+ * @returns returns.handleImageSelect - Handler for image selection with z-index management
+ * @returns returns.handleCanvasClick - Handler for canvas clicks (deselection)
+ * @returns returns.handleImageDelete - Handler for image deletion with request cancellation
+ * @returns returns.handleImageDuplicate - Handler for creating image duplicates
+ * @returns returns.handleImageExpand - Handler for expanding image into 4 variations
+ * @returns returns.createNewTile - Handler for creating new tiles with prompt generation
+ * @returns returns.updateSelectedTile - Handler for updating the selected tile's prompt
+ * 
+ * @example
+ * ```tsx
+ * const operations = useImageOperations({
+ *   images,
+ *   selectedImageId,
+ *   updateImage,
+ *   deleteImage,
+ *   selectImage,
+ *   setCurrentPrompt,
+ *   setImages,
+ *   addImage,
+ *   setError,
+ *   generateImageForTile,
+ *   generatePromptVariations,
+ *   cancelActiveRequest,
+ * });
+ * 
+ * // Use the operations
+ * operations.handleImageSelect('image_123');
+ * operations.createNewTile('A beautiful landscape');
+ * ```
+ */
 export function useImageOperations(props: UseImageOperationsProps) {
   const {
     images,

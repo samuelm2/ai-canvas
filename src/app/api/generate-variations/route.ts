@@ -4,6 +4,37 @@ import { createSafeErrorResponse } from '../../../lib/errors';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
+/**
+ * POST /api/generate-variations
+ * Generates creative variations of an image prompt using OpenAI's GPT model
+ * 
+ * @param {NextRequest} request - The incoming request containing the base prompt
+ * @returns {Promise<NextResponse>} JSON response with 4 prompt variations
+ * 
+ * @description Uses OpenAI's GPT model to generate 4 creative variations of a given
+ * image prompt. Each variation explores different artistic styles, moods, or creative
+ * interpretations while maintaining the core subject matter.
+ * If no API key is configured, falls back to demo variations with predefined styles.
+ * 
+ * @example
+ * Request body:
+ * {
+ *   "prompt": "A cat sitting on a windowsill"
+ * }
+ * 
+ * Response:
+ * {
+ *   "success": true,
+ *   "variations": [
+ *     "A cat sitting on a windowsill, artistic oil painting style",
+ *     "A cat sitting on a windowsill, cyberpunk neon aesthetic",
+ *     "A cat sitting on a windowsill, watercolor illustration",
+ *     "A cat sitting on a windowsill, minimalist black and white photography"
+ *   ]
+ * }
+ * 
+ * @note In demo mode (no API key), returns predefined style variations
+ */
 export async function POST(request: NextRequest) {
   try {
     // Add error handling for JSON parsing

@@ -2,6 +2,15 @@
 
 import React, { useState } from 'react';
 
+/**
+ * Props for the ShareModal component
+ * 
+ * @interface ShareModalProps
+ * @property {boolean} isOpen - Whether the modal is currently open
+ * @property {function} onClose - Callback to close the modal
+ * @property {string} shareUrl - The URL to share
+ * @property {function} onCopyUrl - Callback to copy the share URL to clipboard
+ */
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,6 +18,27 @@ interface ShareModalProps {
   onCopyUrl: () => Promise<boolean>;
 }
 
+/**
+ * ShareModal - Modal component for sharing saved canvas documents
+ * 
+ * @param {ShareModalProps} props - Component props
+ * @returns {JSX.Element | null} The share modal or null if not open
+ * 
+ * @description A modal component that appears after successfully saving a canvas
+ * to display the share URL and provide copy functionality. Features:
+ * - Success message with celebration emoji
+ * - Formatted share URL display
+ * - Copy-to-clipboard functionality with visual feedback
+ * - Close button to dismiss the modal
+ * 
+ * @example
+ * <ShareModal
+ *   isOpen={showModal}
+ *   onClose={() => setShowModal(false)}
+ *   shareUrl="https://example.com/canvas/123"
+ *   onCopyUrl={() => copyToClipboard()}
+ * />
+ */
 export default function ShareModal({ isOpen, onClose, shareUrl, onCopyUrl }: ShareModalProps) {
   const [copySuccess, setCopySuccess] = useState(false);
 

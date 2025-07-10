@@ -1,6 +1,12 @@
 import { Suspense } from 'react';
 import ImageCanvas from '../components/ImageCanvas';
 
+/**
+ * Home page component - the main entry point of the application
+ * Renders the AI Image Canvas with a loading fallback
+ * 
+ * @returns {JSX.Element} The home page with suspense boundary and image canvas
+ */
 export default function Home() {
   return (
     <Suspense fallback={

@@ -4,6 +4,31 @@ import { createSafeErrorResponse } from '../../../lib/errors';
 
 const FAI_API_URL = 'https://fal.run/fal-ai/flux/schnell';
 
+/**
+ * POST /api/generate-image
+ * Generates an AI image based on a text prompt
+ * 
+ * @param {NextRequest} request - The incoming request containing the image prompt
+ * @returns {Promise<NextResponse>} JSON response with the generated image URL
+ * 
+ * @description Generates an AI image using the Flux model from Fal.AI.
+ * If no API key is configured, falls back to demo mode using placeholder images.
+ * The endpoint validates the prompt, calls the AI service, and returns the image URL.
+ * 
+ * @example
+ * Request body:
+ * {
+ *   "prompt": "A serene mountain landscape at sunset"
+ * }
+ * 
+ * Response:
+ * {
+ *   "success": true,
+ *   "imageUrl": "https://fal.run/generated-image-url"
+ * }
+ * 
+ * @note In demo mode (no API key), returns random placeholder images from Picsum
+ */
 export async function POST(request: NextRequest) {
   try {
     // Add error handling for JSON parsing

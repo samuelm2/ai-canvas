@@ -1,6 +1,27 @@
 import { useState, useCallback } from 'react';
 import { CanvasImage } from '../types';
 
+/**
+ * useCanvasState - Base state management hook for the image canvas
+ * 
+ * @returns {Object} Canvas state and basic operations
+ * 
+ * @description Provides the fundamental state management for the AI image canvas.
+ * This hook manages the core state including images array, selected image,
+ * current prompt, organization state, and error handling. It provides basic
+ * CRUD operations for images and selection management.
+ * 
+ * @example
+ * const {
+ *   images, selectedImage, currentPrompt, error,
+ *   addImage, updateImage, deleteImage, selectImage, clearAll
+ * } = useCanvasState();
+ * 
+ * @returns {Object} Object containing:
+ * - **State**: images, selectedImageId, selectedImage, currentPrompt, isOrganizing, error
+ * - **Setters**: setImages, setCurrentPrompt, setIsOrganizing, setErrorModal
+ * - **Operations**: addImage, updateImage, deleteImage, selectImage, clearAll, dismissError
+ */
 export function useCanvasState() {
   const [images, setImages] = useState<CanvasImage[]>([]);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);

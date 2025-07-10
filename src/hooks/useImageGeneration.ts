@@ -2,11 +2,46 @@ import { useRef, useCallback, useEffect } from 'react';
 import { CanvasImage } from '../types';
 import { AIService } from '../services/aiService';
 
+/**
+ * Props for the useImageGeneration hook
+ * 
+ * @interface UseImageGenerationProps
+ * @property {function} updateImage - Function to update image properties
+ * @property {function} setError - Function to set error messages
+ */
 interface UseImageGenerationProps {
   updateImage: (id: string, updates: Partial<CanvasImage>) => void;
   setError: (error: string | null) => void;
 }
 
+/**
+ * useImageGeneration - Hook for managing AI image generation operations
+ * 
+ * @param {UseImageGenerationProps} props - Hook configuration
+ * @returns {Object} Image generation functions and utilities
+ * 
+ * @description Provides functionality for generating AI images and managing
+ * the generation lifecycle. Handles request management, image preloading,
+ * prompt variations, and proper cleanup of resources.
+ * 
+ * @example
+ * const {
+ *   generateImageForTile,
+ *   generatePromptVariations,
+ *   preloadImage,
+ *   cleanup
+ * } = useImageGeneration({
+ *   updateImage,
+ *   setError
+ * });
+ * 
+ * @returns {Object} Object containing:
+ * - **generateImageForTile**: Function to generate an image for a specific tile
+ * - **generatePromptVariations**: Function to generate prompt variations
+ * - **cancelActiveRequest**: Function to cancel an active generation request
+ * - **preloadImage**: Function to preload an image URL
+ * - **cleanup**: Function to cleanup all active requests
+ */
 export function useImageGeneration({ updateImage, setError }: UseImageGenerationProps) {
   const activeRequestsRef = useRef<Map<string, AbortController>>(new Map());
 

@@ -2,6 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { loadDocument, updateDocument } from '../../../../lib/database';
 import { createSafeErrorResponse } from '../../../../lib/errors';
 
+/**
+ * GET /api/documents/[id]
+ * Retrieves a document by its ID from the database
+ * 
+ * @param {NextRequest} request - The incoming request
+ * @param {Object} context - Route context containing params
+ * @param {Promise<{id: string}>} context.params - Route parameters with document ID
+ * @returns {Promise<NextResponse>} JSON response with document data
+ * 
+ * @description Loads a specific document from the database by its UUID.
+ * Validates the ID format and returns the document with its images and metadata.
+ * 
+ * @example
+ * Request: GET /api/documents/123e4567-e89b-12d3-a456-426614174000
+ * Response:
+ * {
+ *   "success": true,
+ *   "document": {
+ *     "id": "123e4567-e89b-12d3-a456-426614174000",
+ *     "title": "My Canvas",
+ *     "images": [...],
+ *     "createdAt": "2023-01-01T00:00:00.000Z"
+ *   }
+ * }
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -32,6 +57,32 @@ export async function GET(
   }
 }
 
+/**
+ * PUT /api/documents/[id]
+ * Updates an existing document in the database
+ * 
+ * @param {NextRequest} request - The incoming request containing updated document data
+ * @param {Object} context - Route context containing params
+ * @param {Promise<{id: string}>} context.params - Route parameters with document ID
+ * @returns {Promise<NextResponse>} JSON response with success status
+ * 
+ * @description Updates a document's title and images array in the database.
+ * Validates the ID format and request body before updating.
+ * 
+ * @example
+ * Request: PUT /api/documents/123e4567-e89b-12d3-a456-426614174000
+ * Request body:
+ * {
+ *   "title": "Updated Canvas",
+ *   "images": [...]
+ * }
+ * 
+ * Response:
+ * {
+ *   "success": true,
+ *   "documentId": "123e4567-e89b-12d3-a456-426614174000"
+ * }
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -8,6 +8,31 @@ import CanvasHeader from './CanvasHeader';
 import CanvasContent from './CanvasContent';
 import ErrorTester from './ErrorTester';
 
+/**
+ * ImageCanvas - Main container component for the AI Image Canvas application
+ * 
+ * @returns {JSX.Element} The complete image canvas interface with header, content, and error handling
+ * 
+ * @description The primary component that orchestrates the AI image generation canvas.
+ * It manages the overall state, handles user interactions, and coordinates between
+ * different sections of the application. Features include:
+ * - Image generation and management
+ * - Canvas organization and layout
+ * - Document saving and loading
+ * - Error handling and user feedback
+ * - URL-based document sharing
+ * 
+ * @example
+ * // Used in the main page
+ * <ImageCanvas />
+ * 
+ * @features
+ * - Live prompt input with debounced image generation
+ * - Drag and drop image positioning
+ * - Document persistence and sharing
+ * - Error boundary integration
+ * - Responsive design with mobile support
+ */
 export default function ImageCanvas() {
   const searchParams = useSearchParams();
   

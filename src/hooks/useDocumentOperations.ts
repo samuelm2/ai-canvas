@@ -2,6 +2,17 @@ import { useCallback, useState, useRef, useEffect } from 'react';
 import { DocumentService } from '../services/documentService';
 import { CanvasImage, FileMenuStatus } from '../types';
 
+/**
+ * Props for the useDocumentOperations hook
+ * 
+ * @interface UseDocumentOperationsProps
+ * @property {CanvasImage[]} images - Array of canvas images to save/load
+ * @property {function} setImages - Function to update the images array
+ * @property {function} setError - Function to set error messages
+ * @property {function} clearAll - Function to clear all canvas state
+ * @property {function} updateImage - Function to update image properties
+ * @property {function} preloadImage - Function to preload an image URL
+ */
 interface UseDocumentOperationsProps {
   images: CanvasImage[];
   setImages: (images: CanvasImage[]) => void;
@@ -11,6 +22,44 @@ interface UseDocumentOperationsProps {
   preloadImage: (url: string) => Promise<void>;
 }
 
+/**
+ * useDocumentOperations - Hook for managing document persistence and sharing
+ * 
+ * @param {UseDocumentOperationsProps} props - Hook configuration
+ * @returns {Object} Document operation functions and state
+ * 
+ * @description Provides comprehensive functionality for saving, loading, and
+ * sharing canvas documents. Manages document state, file operations status,
+ * URL generation for sharing, and proper cleanup of resources.
+ * 
+ * @example
+ * const {
+ *   saveDocument,
+ *   loadDocument,
+ *   copyShareUrl,
+ *   fileMenuStatus,
+ *   shareUrl,
+ *   lastSavedDocumentId,
+ *   isLoading
+ * } = useDocumentOperations({
+ *   images,
+ *   setImages,
+ *   setError,
+ *   clearAll,
+ *   updateImage,
+ *   preloadImage
+ * });
+ * 
+ * @returns {Object} Object containing:
+ * - **saveDocument**: Function to save the canvas as a document
+ * - **loadDocument**: Function to load a document by ID
+ * - **copyShareUrl**: Function to copy share URL to clipboard
+ * - **resetDocumentState**: Function to reset document state
+ * - **fileMenuStatus**: Current status of file operations
+ * - **isLoading**: Whether a document is currently loading
+ * - **lastSavedDocumentId**: ID of the last saved document
+ * - **shareUrl**: URL for sharing the current document
+ */
 export function useDocumentOperations({
   images,
   setImages,

@@ -5,6 +5,18 @@ import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import Image from 'next/image';
 import { CanvasImage } from '../types';
 
+/**
+ * Props for the ImageTile component
+ * 
+ * @interface ImageTileProps
+ * @property {CanvasImage} image - The image data and metadata
+ * @property {function} onDrag - Callback for when the image is dragged to a new position
+ * @property {function} onDelete - Callback for when the image is deleted
+ * @property {function} onSelect - Callback for when the image is selected
+ * @property {function} onDuplicate - Callback for when the image is duplicated
+ * @property {function} onExpand - Callback for when the image is expanded into variations
+ * @property {boolean} isOrganizing - Whether the canvas is currently organizing images in a grid
+ */
 interface ImageTileProps {
   image: CanvasImage;
   onDrag: (id: string, x: number, y: number) => void;
@@ -15,6 +27,32 @@ interface ImageTileProps {
   isOrganizing: boolean;
 }
 
+/**
+ * ImageTile - Individual draggable image tile component
+ * 
+ * @param {ImageTileProps} props - Component props
+ * @returns {JSX.Element} A draggable image tile with controls and state indicators
+ * 
+ * @description A draggable image tile that displays generated AI images with
+ * interactive controls. Features include:
+ * - Drag and drop positioning
+ * - Selection state management
+ * - Image loading states and error handling
+ * - Action buttons (delete, duplicate, expand)
+ * - Hover and focus states
+ * - Smooth animations and transitions
+ * 
+ * @example
+ * <ImageTile
+ *   image={canvasImage}
+ *   onDrag={(id, x, y) => handleImageDrag(id, x, y)}
+ *   onDelete={(id) => handleImageDelete(id)}
+ *   onSelect={(id) => handleImageSelect(id)}
+ *   onDuplicate={(id) => handleImageDuplicate(id)}
+ *   onExpand={(id) => handleImageExpand(id)}
+ *   isOrganizing={false}
+ * />
+ */
 function ImageTile({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, isOrganizing }: ImageTileProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -198,7 +236,7 @@ function ImageTile({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, i
         {/* Prompt tooltip */}
         {image.prompt && image.selected && (
           <div className="absolute top-full left-0 mt-2 z-10 max-w-32 md:max-w-64">
-            <div className="tooltip whitespace-normal" style={{ width: 'max-content', maxWidth: '100%' }}>
+            <div className="bg-black bg-opacity-75 text-white text-xs p-2 rounded-lg break-words">
               {image.prompt}
             </div>
           </div>
@@ -208,4 +246,4 @@ function ImageTile({ image, onDrag, onDelete, onSelect, onDuplicate, onExpand, i
   );
 }
 
-export default React.memo(ImageTile); 
+export default ImageTile; 

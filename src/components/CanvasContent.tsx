@@ -4,6 +4,19 @@ import React from 'react';
 import ImageTile from './ImageTile';
 import { CanvasImage } from '../types';
 
+/**
+ * Props for the CanvasContent component
+ * 
+ * @interface CanvasContentProps
+ * @property {CanvasImage[]} images - Array of image tiles to display on the canvas
+ * @property {function} onCanvasClick - Callback for when the canvas background is clicked
+ * @property {function} onImageDrag - Callback for when an image is dragged to a new position
+ * @property {function} onImageSelect - Callback for when an image is selected
+ * @property {function} onImageDelete - Callback for when an image is deleted
+ * @property {function} onImageDuplicate - Callback for when an image is duplicated
+ * @property {function} onImageExpand - Callback for when an image is expanded into variations
+ * @property {boolean} isOrganizing - Whether the canvas is currently organizing images in a grid
+ */
 interface CanvasContentProps {
   images: CanvasImage[];
   onCanvasClick: (e: React.MouseEvent) => void;
@@ -15,6 +28,31 @@ interface CanvasContentProps {
   isOrganizing: boolean;
 }
 
+/**
+ * CanvasContent - Main scrollable area containing all image tiles
+ * 
+ * @param {CanvasContentProps} props - Component props
+ * @returns {JSX.Element} The canvas content area with image tiles and interactions
+ * 
+ * @description The main content area of the canvas where image tiles are displayed
+ * and managed. It provides a scrollable workspace with:
+ * - Grid guidelines for visual alignment
+ * - Empty state with instructions
+ * - Image tile positioning and interactions
+ * - Click handling for canvas background
+ * 
+ * @example
+ * <CanvasContent
+ *   images={canvasImages}
+ *   onCanvasClick={(e) => handleCanvasClick(e)}
+ *   onImageDrag={(id, x, y) => moveImage(id, x, y)}
+ *   onImageSelect={(id) => selectImage(id)}
+ *   onImageDelete={(id) => deleteImage(id)}
+ *   onImageDuplicate={(id) => duplicateImage(id)}
+ *   onImageExpand={(id) => expandImage(id)}
+ *   isOrganizing={false}
+ * />
+ */
 export default function CanvasContent({
   images,
   onCanvasClick,

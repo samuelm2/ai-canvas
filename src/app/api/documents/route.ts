@@ -3,6 +3,36 @@ import { saveDocument, initializeDatabase } from '../../../lib/database';
 import { SaveDocumentRequest } from '../../../types';
 import { createSafeErrorResponse } from '../../../lib/errors';
 
+/**
+ * POST /api/documents
+ * Saves a new document with images to the database
+ * 
+ * @param {NextRequest} request - The incoming request containing document data
+ * @returns {Promise<NextResponse>} JSON response with success status and document ID
+ * 
+ * @description Handles saving a new document with title and images array.
+ * The endpoint initializes the database schema if needed, validates the request body,
+ * and saves the document to the database.
+ * 
+ * @example
+ * Request body:
+ * {
+ *   "title": "My Canvas",
+ *   "images": [
+ *     {
+ *       "id": "image1",
+ *       "url": "https://example.com/image1.jpg",
+ *       "position": { "x": 100, "y": 200 }
+ *     }
+ *   ]
+ * }
+ * 
+ * Response:
+ * {
+ *   "success": true,
+ *   "documentId": "uuid-string"
+ * }
+ */
 export async function POST(request: NextRequest) {
   try {
     // Initialize database schema if needed

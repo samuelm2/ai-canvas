@@ -3,6 +3,18 @@
 import React, { useState } from 'react';
 import { FileMenuStatus } from '../types';
 
+/**
+ * Props for the FileMenu component
+ * 
+ * @interface FileMenuProps
+ * @property {number} imagesCount - Number of images currently on the canvas
+ * @property {FileMenuStatus} fileMenuStatus - Current status of file operations
+ * @property {string | null} lastSavedDocumentId - ID of the last saved document
+ * @property {string | null} shareUrl - URL for sharing the saved document
+ * @property {function} onSave - Callback to save the current canvas
+ * @property {function} onSaveNewCopy - Callback to save a new copy of the canvas
+ * @property {function} onCopyShareUrl - Callback to copy the share URL to clipboard
+ */
 interface FileMenuProps {
   imagesCount: number;
   fileMenuStatus: FileMenuStatus;
@@ -13,6 +25,30 @@ interface FileMenuProps {
   onCopyShareUrl: () => void;
 }
 
+/**
+ * FileMenu - Dropdown menu component for file operations
+ * 
+ * @param {FileMenuProps} props - Component props
+ * @returns {JSX.Element} A dropdown menu with file operation buttons
+ * 
+ * @description A dropdown menu component that provides file operations for
+ * the canvas including save, save new copy, and copy share URL. Features:
+ * - Dynamic button states based on operation status
+ * - Conditional menu items based on document state
+ * - Visual feedback for ongoing operations
+ * - Click-outside-to-close functionality
+ * 
+ * @example
+ * <FileMenu
+ *   imagesCount={5}
+ *   fileMenuStatus="idle"
+ *   lastSavedDocumentId="doc-123"
+ *   shareUrl="https://example.com/canvas/123"
+ *   onSave={() => saveCanvas()}
+ *   onSaveNewCopy={() => saveNewCopy()}
+ *   onCopyShareUrl={() => copyUrl()}
+ * />
+ */
 export default function FileMenu({
   imagesCount,
   fileMenuStatus,

@@ -2,10 +2,35 @@
 
 import { useState } from 'react';
 
+/**
+ * Props for the ErrorTester component
+ * 
+ * @interface ErrorTesterProps
+ * @property {function} onTestError - Callback function to trigger error modal display
+ */
 interface ErrorTesterProps {
   onTestError: (error: string | null) => void;
 }
 
+/**
+ * ErrorTester - Development-only component for testing error handling
+ * 
+ * @param {ErrorTesterProps} props - Component props
+ * @returns {JSX.Element} A floating panel with error testing buttons
+ * 
+ * @description A development utility component that provides buttons to test
+ * different types of error scenarios in the application. It allows testing:
+ * - Error boundary functionality (component-level errors)
+ * - Error modal display (user-facing error messages)
+ * - Error handling flows and user experience
+ * 
+ * @example
+ * {process.env.NODE_ENV === 'development' && (
+ *   <ErrorTester onTestError={(error) => setErrorMessage(error)} />
+ * )}
+ * 
+ * @note This component should only be rendered in development mode
+ */
 export default function ErrorTester({ onTestError }: ErrorTesterProps) {
   const [shouldError, setShouldError] = useState(false);
 
